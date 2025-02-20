@@ -1,0 +1,450 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Basic">
+      <UniqueIdentifier>{a60810c2-b7d7-4b77-b68a-9e74d38231a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Basic\atoms">
+      <UniqueIdentifier>{99fdf2cf-d0b0-4c1e-b320-992927dea32b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Basic\expressions">
+      <UniqueIdentifier>{0541249f-8f0e-4ba0-9630-26307f56c42f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Basic\extensions">
+      <UniqueIdentifier>{838e26a9-f505-4d92-9baf-56c8b051ef41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Basic\objects">
+      <UniqueIdentifier>{88adfcdb-750d-4b69-b2a5-a6433d6dbf42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Basic\windows">
+      <UniqueIdentifier>{41c40f96-71cb-4be7-9837-3fd85fef3d38}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="iWaterScript.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WaterScript.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadWaterScript.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Basic.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_engine.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_assign_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_beep_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_call_sub_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_case_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_cls_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_dialog_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_dim_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_disp_set_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_dll_sub_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_do_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_end_routine_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_exit_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_ext_func.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_ext_sub_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_for_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_goto_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_if_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_input_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_label_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_print_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_routine_entry_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_while_atom.cpp">
+      <Filter>Basic\atoms</Filter>
+    </ClCompile>
+    <ClCompile Include="c_expression.cpp">
+      <Filter>Basic\expressions</Filter>
+    </ClCompile>
+    <ClCompile Include="c_expression_const.cpp">
+      <Filter>Basic\expressions</Filter>
+    </ClCompile>
+    <ClCompile Include="c_expression_disp_get.cpp">
+      <Filter>Basic\expressions</Filter>
+    </ClCompile>
+    <ClCompile Include="c_expression_dll_function.cpp">
+      <Filter>Basic\expressions</Filter>
+    </ClCompile>
+    <ClCompile Include="c_expression_ext_const.cpp">
+      <Filter>Basic\expressions</Filter>
+    </ClCompile>
+    <ClCompile Include="c_expression_ext_function.cpp">
+      <Filter>Basic\expressions</Filter>
+    </ClCompile>
+    <ClCompile Include="c_expression_var.cpp">
+      <Filter>Basic\expressions</Filter>
+    </ClCompile>
+    <ClCompile Include="array.cpp">
+      <Filter>Basic\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="cast_extensions.cpp">
+      <Filter>Basic\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="date.cpp">
+      <Filter>Basic\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="file_extensions.cpp">
+      <Filter>Basic\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="math_extensions.cpp">
+      <Filter>Basic\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="other.cpp">
+      <Filter>Basic\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="string_extensions.cpp">
+      <Filter>Basic\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="c_disp_get.cpp">
+      <Filter>Basic\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="c_disp_level.cpp">
+      <Filter>Basic\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="InputDialog.cpp">
+      <Filter>Basic\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Terminal.cpp">
+      <Filter>Basic\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="c_atom.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_atom_table.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_call_stack.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_char_stream.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_com_hint.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_dll_func.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_str_array.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_string.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_variable.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="c_vector_table.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="com.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_extension.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_hints.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_io.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_parse.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="iWaterScriptFunc.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="iWaterScript.def">
+      <Filter>소스 파일</Filter>
+    </None>
+    <None Include="res\iWaterScript.rc2">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="iWaterScript.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WaterScript.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadWaterScript.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_engine.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_assign_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_beep_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_call_sub_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_case_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_cls_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_dialog_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_dim_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_disp_set_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_dll_sub_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_do_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_end_routine_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_exit_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_ext_func.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_ext_sub_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_for_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_goto_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_if_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_input_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_label_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_print_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_routine_entry_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_while_atom.h">
+      <Filter>Basic\atoms</Filter>
+    </ClInclude>
+    <ClInclude Include="c_expression.h">
+      <Filter>Basic\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="c_expression_const.h">
+      <Filter>Basic\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="c_expression_disp_get.h">
+      <Filter>Basic\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="c_expression_dll_function.h">
+      <Filter>Basic\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="c_expression_ext_const.h">
+      <Filter>Basic\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="c_expression_ext_function.h">
+      <Filter>Basic\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="c_expression_var.h">
+      <Filter>Basic\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="array.h">
+      <Filter>Basic\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="cast_extensions.h">
+      <Filter>Basic\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="date.h">
+      <Filter>Basic\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="file_extensions.h">
+      <Filter>Basic\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="LIST.H">
+      <Filter>Basic\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="math_extensions.h">
+      <Filter>Basic\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="other.h">
+      <Filter>Basic\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="string_extensions.h">
+      <Filter>Basic\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="c_disp_get.h">
+      <Filter>Basic\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="c_disp_level.h">
+      <Filter>Basic\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="InputDialog.h">
+      <Filter>Basic\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Terminal.h">
+      <Filter>Basic\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="c_array.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_atom.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_atom_table.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_call_stack.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_char_stream.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_com_hint.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_dll_func.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_ptr_array.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_str_array.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_string.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_sub_table.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_variable.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="c_vector_table.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="com.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="extensions.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="token.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="iWaterScriptFunc.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="iWaterScriptStruct.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="iWaterScript.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="iWaterScript.idl">
+      <Filter>소스 파일</Filter>
+    </Midl>
+  </ItemGroup>
+</Project>

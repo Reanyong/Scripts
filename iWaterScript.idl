@@ -1,0 +1,10 @@
+﻿// iWaterScript.idl: iWaterScript.dll의 형식 라이브러리 소스
+// 이 파일은 MIDL 컴파일러에 의해 처리되어
+// 형식 라이브러리(iWaterScript.tlb)입니다.
+
+[ uuid(831ee924-cc88-443a-8cd3-eaf4e7d2acb4), version(1.0) ]
+library iWaterScript
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+};

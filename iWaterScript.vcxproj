@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{EA0B8A22-BEF5-4E7F-B91E-964E36951F4F}</ProjectGuid>
+    <Keyword>MFCDLLProj</Keyword>
+    <RootNamespace>iWaterScript</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>C:\iWaterNeo\Bin\</OutDir>
+    <TargetName>WaterScriptDllExD</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>C:\iWaterNeo\Bin\</OutDir>
+    <TargetName>WaterScriptDllEx</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>.\iWaterScript.def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>$(IntDir)iWaterScript.tlb</TypeLibraryName>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;_USRDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>.\iWaterScript.def</ModuleDefinitionFile>
+      <RegisterOutput>false</RegisterOutput>
+      <AdditionalDependencies>..\lib\TagCollectorD.lib</AdditionalDependencies>
+      <ImportLibrary>..\lib\$(TargetName).lib</ImportLibrary>
+      <OutputFile>C:\iWaterNeo\Bin\WaterScriptDllExD.dll</OutputFile>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>$(IntDir)iWaterScript.tlb</TypeLibraryName>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>.\iWaterScript.def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>$(IntDir)iWaterScript.tlb</TypeLibraryName>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>.\iWaterScript.def</ModuleDefinitionFile>
+      <RegisterOutput>true</RegisterOutput>
+      <AdditionalDependencies>..\lib\TagCollector.lib</AdditionalDependencies>
+      <ImportLibrary>..\..\lib\$(TargetName).lib</ImportLibrary>
+      <OutputFile>C:\iWaterNeo\Bin\WaterScriptDllEx.dll</OutputFile>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>$(IntDir)iWaterScript.tlb</TypeLibraryName>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="array.cpp" />
+    <ClCompile Include="Basic.cpp" />
+    <ClCompile Include="cast_extensions.cpp" />
+    <ClCompile Include="com.cpp" />
+    <ClCompile Include="c_assign_atom.cpp" />
+    <ClCompile Include="c_atom.cpp" />
+    <ClCompile Include="c_atom_table.cpp" />
+    <ClCompile Include="c_beep_atom.cpp" />
+    <ClCompile Include="c_call_stack.cpp" />
+    <ClCompile Include="c_call_sub_atom.cpp" />
+    <ClCompile Include="c_case_atom.cpp" />
+    <ClCompile Include="c_char_stream.cpp" />
+    <ClCompile Include="c_cls_atom.cpp" />
+    <ClCompile Include="c_com_hint.cpp" />
+    <ClCompile Include="c_dialog_atom.cpp" />
+    <ClCompile Include="c_dim_atom.cpp" />
+    <ClCompile Include="c_disp_get.cpp" />
+    <ClCompile Include="c_disp_level.cpp" />
+    <ClCompile Include="c_disp_set_atom.cpp" />
+    <ClCompile Include="c_dll_func.cpp" />
+    <ClCompile Include="c_dll_sub_atom.cpp" />
+    <ClCompile Include="c_do_atom.cpp" />
+    <ClCompile Include="c_end_routine_atom.cpp" />
+    <ClCompile Include="c_engine.cpp" />
+    <ClCompile Include="c_exit_atom.cpp" />
+    <ClCompile Include="c_expression.cpp" />
+    <ClCompile Include="c_expression_const.cpp" />
+    <ClCompile Include="c_expression_disp_get.cpp" />
+    <ClCompile Include="c_expression_dll_function.cpp" />
+    <ClCompile Include="c_expression_ext_const.cpp" />
+    <ClCompile Include="c_expression_ext_function.cpp" />
+    <ClCompile Include="c_expression_var.cpp" />
+    <ClCompile Include="c_ext_func.cpp" />
+    <ClCompile Include="c_ext_sub_atom.cpp" />
+    <ClCompile Include="c_for_atom.cpp" />
+    <ClCompile Include="c_goto_atom.cpp" />
+    <ClCompile Include="c_if_atom.cpp" />
+    <ClCompile Include="c_input_atom.cpp" />
+    <ClCompile Include="c_label_atom.cpp" />
+    <ClCompile Include="c_print_atom.cpp" />
+    <ClCompile Include="c_routine_entry_atom.cpp" />
+    <ClCompile Include="c_string.cpp" />
+    <ClCompile Include="c_str_array.cpp" />
+    <ClCompile Include="c_variable.cpp" />
+    <ClCompile Include="c_vector_table.cpp" />
+    <ClCompile Include="c_while_atom.cpp" />
+    <ClCompile Include="date.cpp" />
+    <ClCompile Include="engine_extension.cpp" />
+    <ClCompile Include="engine_hints.cpp" />
+    <ClCompile Include="engine_io.cpp" />
+    <ClCompile Include="engine_parse.cpp" />
+    <ClCompile Include="file_extensions.cpp" />
+    <ClCompile Include="InputDialog.cpp" />
+    <ClCompile Include="iWaterScript.cpp" />
+    <ClCompile Include="iWaterScriptFunc.cpp" />
+    <ClCompile Include="math_extensions.cpp" />
+    <ClCompile Include="other.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="string_extensions.cpp" />
+    <ClCompile Include="Terminal.cpp" />
+    <ClCompile Include="ThreadWaterScript.cpp" />
+    <ClCompile Include="WaterScript.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="iWaterScript.def" />
+    <None Include="res\iWaterScript.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Include\WaterScript.h" />
+    <ClInclude Include="array.h" />
+    <ClInclude Include="Basic.h" />
+    <ClInclude Include="cast_extensions.h" />
+    <ClInclude Include="com.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="c_array.h" />
+    <ClInclude Include="c_assign_atom.h" />
+    <ClInclude Include="c_atom.h" />
+    <ClInclude Include="c_atom_table.h" />
+    <ClInclude Include="c_beep_atom.h" />
+    <ClInclude Include="c_call_stack.h" />
+    <ClInclude Include="c_call_sub_atom.h" />
+    <ClInclude Include="c_case_atom.h" />
+    <ClInclude Include="c_char_stream.h" />
+    <ClInclude Include="c_cls_atom.h" />
+    <ClInclude Include="c_com_hint.h" />
+    <ClInclude Include="c_dialog_atom.h" />
+    <ClInclude Include="c_dim_atom.h" />
+    <ClInclude Include="c_disp_get.h" />
+    <ClInclude Include="c_disp_level.h" />
+    <ClInclude Include="c_disp_set_atom.h" />
+    <ClInclude Include="c_dll_func.h" />
+    <ClInclude Include="c_dll_sub_atom.h" />
+    <ClInclude Include="c_do_atom.h" />
+    <ClInclude Include="c_end_routine_atom.h" />
+    <ClInclude Include="c_engine.h" />
+    <ClInclude Include="c_exit_atom.h" />
+    <ClInclude Include="c_expression.h" />
+    <ClInclude Include="c_expression_const.h" />
+    <ClInclude Include="c_expression_disp_get.h" />
+    <ClInclude Include="c_expression_dll_function.h" />
+    <ClInclude Include="c_expression_ext_const.h" />
+    <ClInclude Include="c_expression_ext_function.h" />
+    <ClInclude Include="c_expression_var.h" />
+    <ClInclude Include="c_ext_func.h" />
+    <ClInclude Include="c_ext_sub_atom.h" />
+    <ClInclude Include="c_for_atom.h" />
+    <ClInclude Include="c_goto_atom.h" />
+    <ClInclude Include="c_if_atom.h" />
+    <ClInclude Include="c_input_atom.h" />
+    <ClInclude Include="c_label_atom.h" />
+    <ClInclude Include="c_print_atom.h" />
+    <ClInclude Include="c_ptr_array.h" />
+    <ClInclude Include="c_routine_entry_atom.h" />
+    <ClInclude Include="c_string.h" />
+    <ClInclude Include="c_str_array.h" />
+    <ClInclude Include="c_sub_table.h" />
+    <ClInclude Include="c_variable.h" />
+    <ClInclude Include="c_vector_table.h" />
+    <ClInclude Include="c_while_atom.h" />
+    <ClInclude Include="date.h" />
+    <ClInclude Include="extensions.h" />
+    <ClInclude Include="file_extensions.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="InputDialog.h" />
+    <ClInclude Include="iWaterScript.h" />
+    <ClInclude Include="iWaterScriptFunc.h" />
+    <ClInclude Include="iWaterScriptStruct.h" />
+    <ClInclude Include="LIST.H" />
+    <ClInclude Include="math_extensions.h" />
+    <ClInclude Include="other.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="string_extensions.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="Terminal.h" />
+    <ClInclude Include="ThreadWaterScript.h" />
+    <ClInclude Include="token.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="iWaterScript.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="iWaterScript.idl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
