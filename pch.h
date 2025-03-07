@@ -20,6 +20,8 @@
 #include <map>
 #include "iWaterScriptStruct.h"
 #include "iWaterScriptFunc.h"
+
 extern CTagCollector* g_pTagCol;
 extern char g_szLocalModNode[64];
+
 #endif //PCH_H

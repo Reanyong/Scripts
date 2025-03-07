@@ -672,6 +672,11 @@ DWORD c_engine::_parse(c_vector_table& last, DWORD stop_at)
 			error (CUR_ERR_LINE, "illegal single 'exit'. 'sub', 'function', etc. expected.");
 			return ERR_;
 
+// System -----------------------------
+
+		case token_type::system:
+			return parse_system_statement(last, stop_at);
+
 		default:
 			{
 				error (CUR_ERR_LINE, "%s unexpected here", curtok.format());
@@ -3637,4 +3642,96 @@ bool c_engine::_post_parse()
 	}
 */
 	return b_result;
+}
+
+// System Parse Function
+
+DWORD c_engine::parse_system_statement(c_vector_table& last, DWORD stop_at)
+{
+	// System 키워드 다음에는 반드시 '.' 이 와야 함
+	gettok();
+	if (curtok.type != token_type::dot)
+	{
+		error(CUR_ERR_LINE, "'.' expected after 'System'");
+		return ERR_;
+	}
+
+	// '.' 다음에는 서브시스템 이름이 와야 함
+	gettok();
+	if (curtok.type != token_type::graphic) // 현재는 Graphic만 지원
+	{
+		error(CUR_ERR_LINE, "Subsystem name expected after 'System.'");
+		return ERR_;
+	}
+
+	// Graphic 다음에는 '.' 이 와야 함
+	gettok();
+	if (curtok.type != token_type::dot)
+	{
+		error(CUR_ERR_LINE, "'.' expected after 'System.Graphic'");
+		return ERR_;
+	}
+
+	// '.' 다음에는 객체 이름이 와야 함
+	gettok();
+	if (!curtok.disp_name()) // 이 부분은 객체 이름이 식별자여야 함을 확인
+	{
+		error(CUR_ERR_LINE, "Object name expected after 'System.Graphic.'");
+		return ERR_;
+	}
+
+	// 객체 이름 저장
+	c_string objectName = curtok.m_name;
+
+	// 객체 이름 다음에는 '.' 이 와야 함
+	gettok();
+	if (curtok.type != token_type::dot)
+	{
+		error(CUR_ERR_LINE, "'.' expected after object name");
+		return ERR_;
+	}
+
+	// '.' 다음에는 속성 이름이 와야 함
+	gettok();
+	if (curtok.type != token_type::property) // 현재는 Visible 속성만 지원
+	{
+		error(CUR_ERR_LINE, "Property name expected after 'System.Graphic.Object.'");
+		return ERR_;
+	}
+
+	// Visible 다음에는 '=' 이 와야 함
+	gettok();
+	if (curtok.type != token_type::equal && curtok.type != token_type::assign)
+	{
+		error(CUR_ERR_LINE, "'=' expected after 'Visible'");
+		return ERR_;
+	}
+
+	// '=' 다음에는 값 표현식이 와야 함
+	gettok();
+	c_expression* pValueExpr = _expr();
+	if (!pValueExpr)
+	{
+		error(CUR_ERR_LINE, "Value expression expected");
+		return ERR_;
+	}
+
+	// 이제 SystemPropertyAtom을 생성하여 실행 체인에 추가
+	int nLine = m_char_stream.cur_line();
+	c_system_property_atom* pAtom = new c_system_property_atom(&m_atom_table, &m_call_stack, this, nLine);
+	pAtom->set_object_name(objectName.get_buffer());
+	pAtom->set_property_type(token_type::property); // Visible
+	pAtom->set_value_expr(pValueExpr);
+
+	// 아톰 등록
+	m_atom_table.add(pAtom);
+
+	// 체인 구성
+	while (c_atom** pLast = last.pop())
+		*pLast = pAtom;
+
+	last.push(&pAtom->m_pnext);
+
+	// 구문 분석 완료
+	return TO_GO;
 }

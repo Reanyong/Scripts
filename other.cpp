@@ -2,6 +2,8 @@
 #include "other.h"
 #include "com.h"
 #include "c_engine.h"
+#include <string>
+#include <cstring>
 
 //-----------------------------------------------------------------------------
 // CreateObject ---------------------------------------------------------------

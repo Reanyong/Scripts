@@ -5,7 +5,7 @@
 #include <Winsock2.h>
 #include "c_string.h"
 
-#pragma comment(lib, "Ws2_32.lib") 
+#pragma comment(lib, "Ws2_32.lib")
 
 //MUST BE NOT LESS THAN NEEDED TO CONTAIN CONVERTED DOUBLE
 #define MIN_C_STRING_GROW	32
@@ -35,7 +35,7 @@ c_string::c_string(c_string& origin)
 	m_pdata   = (char*)malloc(origin.m_nlength + 1);
 	m_nalloc  = origin.m_nlength;
 	m_nlength = origin.m_nlength;
-	
+
 	memcpy(m_pdata, origin.m_pdata, origin.m_nlength + 1);
 }
 
@@ -401,9 +401,9 @@ void c_string::format_error(bool b_wsa)
 	int n = b_wsa ? WSAGetLastError() : GetLastError();
 
 	LPVOID lpMsgBuf;
-	FormatMessage( 
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-		FORMAT_MESSAGE_FROM_SYSTEM | 
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
 		FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL,
 		n,
