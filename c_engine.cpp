@@ -289,13 +289,12 @@ bool c_engine::can_be_identifier(const char* p_name, bool b_verbose)
 	while(*p)
 	{
 		// 특수문자 추가 jkh
-		if (!isalnum(*p) && *p != '_' && *p != '$' && *p != '@' && *p != '-')
+		if (!isalnum(*p) && *p != '_' && *p != '$' && *p != '@' && *p != '-' && *p != '.')
 		{
  			if (b_verbose)
 				error(CUR_ERR_LINE, "identifier '%s' contains invalid characters.", p_name);
 			return false;
 		}
-
 		p ++;
 	}
 

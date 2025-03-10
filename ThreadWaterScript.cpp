@@ -28,7 +28,6 @@ END_MESSAGE_MAP()
 
 BOOL CThreadWaterScript::InitInstance()
 {
-
 	return TRUE;
 }
 
@@ -184,6 +183,3 @@ int CThreadWaterScript::SaveScript(const char* szScriptText)
 	}
 	return nRet;
 }
-
-
-

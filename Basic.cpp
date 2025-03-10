@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "Basic.h"
+#include "ScriptSystem.h"
 //#include "c_wait_cursor.h"
 
 BSTR alloc_BSTR(const char* p);
@@ -211,6 +212,16 @@ STDMETHODIMP Basic::InterfaceSupportsErrorInfo(REFIID riid)
 } */
 
 //Basic::Basic() : m_engine(_Module.m_hInst)
+
+void Basic::RegisterSystemObjectFunctions()
+{
+	// 스크립트 엔진에 함수 등록
+	m_engine.add_extension_function("$System.Graphic", System_Graphic, _check_System_Graphic);
+	m_engine.add_extension_function("Graphic.Object", Graphic_Object, _check_Graphic_Object);
+	m_engine.add_extension_function("Object.GetVisible", Object_GetVisible, _check_Object_GetVisible);
+	m_engine.add_extension_sub("Object.SetVisible", Object_SetVisible, _check_Object_SetVisible);
+}
+
 Basic::Basic() : m_engine()
 {
 	/*m_hTerminalFont = CreateFont(
@@ -245,6 +256,9 @@ Basic::Basic() : m_engine()
 //	}
 //
 //	ASSERT (hHook);
+
+	RegisterSystemObjectFunctions();
+
 	m_bSetSource = false;
 }
 
