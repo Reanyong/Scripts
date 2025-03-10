@@ -18,6 +18,7 @@
 #include "c_disp_level.h"
 
 #include "c_str_array.h"
+#include "ScriptSystem.h"
 
 #ifndef VERIFY
 #define VERIFY	// nothing for now...
@@ -276,6 +277,12 @@ void c_engine::add_standard_extension_functions()
 	VERIFY(add_extension_function("GetObjectPosX", GetObjectPosX, _check_GetObjectPosX));
 	VERIFY(add_extension_function("GetObjectPosY", GetObjectPosY, _check_GetObjectPosY));
 	VERIFY(add_extension_function("GetObjectPos", GetObjectPos, _check_GetObjectPos));
+
+	VERIFY(add_extension_function("$System.Graphic",(PEXTENSION_FUNCTION_FUNCTION)System_Graphic,_check_System_Graphic));
+	VERIFY(add_extension_function("Graphic.Object",(PEXTENSION_FUNCTION_FUNCTION)Graphic_Object,_check_Graphic_Object));
+	VERIFY(add_extension_function("Object.Visible",(PEXTENSION_FUNCTION_FUNCTION)Object_GetVisible,_check_Object_GetVisible));
+	//VERIFY(add_extension_sub("Object.Visible", (PEXTENSION_SUB_FUNCTION)Object_SetVisible, _check_Object_SetVisible));
+
 }
 
 void c_engine::add_standard_extension_subs()
@@ -453,6 +460,10 @@ void c_engine::add_standard_hints()
 	VERIFY(add_hint("Assert",			"Assert(condition)"));
 	VERIFY(add_hint("Sleep",			"Sleep(Value)"));
 // check stuff that
+
+	VERIFY(add_hint("$System.Graphic", "그래픽 도면 객체에 접근합니다. 사용법: $System.Graphic(\"도면명\")"));
+	VERIFY(add_hint("Graphic.Object", "특정 도면 내 객체에 접근합니다. 사용법: $System.Graphic(\"도면명\").Object(\"객체명\")"));
+	VERIFY(add_hint("Object.Visible", "객체의 가시성을 설정하거나 가져옵니다. 사용법: $System.Graphic(\"도면명\").Object(\"객체명\").Visible = true/false"));
 
 	_ASSERT(m_hint_kwds.get_size() == m_hint_descs.get_size());
 	n_default_hints = m_hint_kwds.get_size();

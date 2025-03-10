@@ -22,7 +22,7 @@
 #include "Terminal.h"
 #include "InputDialog.h"
 
-
+#include "ScriptSystem.h"
 
 #include "pch.h"
 
@@ -201,6 +201,10 @@ protected:
 
 	c_ext_func*		_ext_func();
 	c_dll_caller*	_dll_caller();
+
+	DWORD parse_system_command(c_vector_table& last, DWORD stop_at);
+
+	c_expression* c_engine::parse_system_expression(const char* expr_str);
 
 // LPDISPATCH-related parsing -------------------------------------------------
 

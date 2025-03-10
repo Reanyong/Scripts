@@ -280,7 +280,7 @@ void c_expression::exec(c_variable* p_result)
 			}
 			else
 			{
-				KWGetTagValue(szName, *p_result);	
+				KWGetTagValue(szName, *p_result);
 				break;
 			}
 			break;
@@ -289,7 +289,7 @@ void c_expression::exec(c_variable* p_result)
 		{
 			c_variable* p_var;
 			m_pcall_stack->get(&m_var_desc, &p_var);
-			
+
 			_ASSERT(p_var);
 			_ASSERT(p_var->vt == (VT_ARRAY | VT_VARIANT));
 
@@ -635,3 +635,24 @@ void c_expression::assert_valid()
 }
 #endif
 
+c_expression* c_engine::parse_system_expression(const char* expr_str)
+{
+	// 간단한 표현식 파싱 구현
+	c_expression* p_expr = new c_expression(&m_call_stack, &m_atom_table, this);
+
+	// 상수 값인 경우 간단히 처리
+	if (_stricmp(expr_str, "true") == 0) {
+		p_expr->m_action = c_action::_const;
+		p_expr->m_constant = true;
+	}
+	else if (_stricmp(expr_str, "false") == 0) {
+		p_expr->m_action = c_action::_const;
+		p_expr->m_constant = false;
+	}
+	else {
+		// 다른 표현식 파싱 (필요에 따라 확장)
+		// ...
+	}
+
+	return p_expr;
+}

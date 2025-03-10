@@ -33,7 +33,7 @@ public:
 	void operator += (const int			val);
 	void operator += (const double		val);
 
-	const char* get_buffer() 
+	const char* get_buffer()
 	{
 		return m_pdata;
 	}

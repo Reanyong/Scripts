@@ -53,6 +53,37 @@ void c_char_stream::gettok(c_token& curtok)
 	while(c == ' ' || c == '\t' || c == '\r' || c == '\n');
 	//while (isspace(c));
 
+	if (c == '$')
+	{
+		// $ 토큰 처리 시작
+		curtok.m_name.empty();
+		curtok.m_name += c;
+
+		// 줄 끝까지 또는 다음 세미콜론까지 모든 내용을 가져옴
+		while (true)
+		{
+			c = get();
+			if (c == 0 || c == '\n' || c == ';')
+				break;
+
+			curtok.m_name += c;
+		}
+
+		if (c) back(); // 줄바꿈이나 세미콜론은 다시 스트림에 되돌림
+
+		// $System으로 시작하는 모든 명령을 system 토큰으로 처리
+		if (strncmp(curtok.m_name.get_buffer(), "$System", 7) == 0)
+		{
+			curtok.type = token_type::system;
+		}
+		else
+		{
+			curtok.type = token_type::name;
+		}
+
+		return;
+	}
+
 	switch (c)
 	{
 	case '.':

@@ -4,7 +4,7 @@
 #include "c_call_stack.h"
 #include "c_disp_level.h"
 
-class c_disp_get  
+class c_disp_get
 {
 	c_call_stack*	m_pcall_stack;
 	c_engine*		m_pengine;
@@ -38,7 +38,7 @@ inline void c_disp_get::set_lpdispatch(IDispatch* lpd, ITypeInfo* pti)
 {
 	_ASSERT(lpd || pti);
 	_ASSERT(!m_lpd && !m_pti);
-	
+
 	m_lpd = lpd;
 	m_pti = pti;
 }

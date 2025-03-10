@@ -160,6 +160,16 @@ bool c_engine::_pre_parse()
 				}
 
 			}
+			if (curtok.type == token_type::system ||
+				curtok.type == token_type::graphic ||
+				curtok.type == token_type::object ||
+				(curtok.m_name[0] == '$' && _stricmp(curtok.m_name.get_buffer(), "$System") == 0))
+			{
+				// $System 관련 구문은 건너뜁니다
+				while (curtok.type != token_type::eos && curtok.type != token_type::eof)
+					gettok();
+				continue;
+			}
 			if (curtok.type == token_type::declare_cond)
 			{
 				while (curtok.type != token_type::eos && curtok.type != token_type::eof) gettok();
@@ -657,7 +667,28 @@ DWORD c_engine::_parse(c_vector_table& last, DWORD stop_at)
 		case token_type::option_cond:
 			n = parse_option();
 			break;
+// System -----------------------------
 
+		case token_type::system:
+			// $System 토큰 처리
+			n = parse_system_command(last, stop_at);
+			break;
+		/*
+		case token_type::graphic:
+			// Graphic 토큰 처리
+			n = parse_graphic_object(last, stop_at);
+			break;
+
+		case token_type::object:
+			// Object 토큰 처리
+			n = parse_object(last, stop_at);
+			break;
+
+		case token_type::property:
+			// property 토큰 처리
+			n = parse_property(last, stop_at);
+			break;
+		*/
 // errors -----------------------------
 
 		case token_type::then_cond:
@@ -3637,4 +3668,82 @@ bool c_engine::_post_parse()
 	}
 */
 	return b_result;
+}
+
+// engine_parse.cpp에 추가할 함수들
+
+DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
+{
+	// $System으로 시작하는 명령 전체 파싱
+	c_string command = curtok.m_name;
+
+	// 간단한 정규 표현식 파싱을 대신할 수 있는 구문 분석
+	// 예: $System.Graphic("도면명").Object("객체명").Visible = true
+
+	// = 기호를 찾아 할당문 여부 확인
+	bool is_assignment = false;
+	c_string left_side;
+	c_string right_side;
+
+	// = 기호 위치 찾기
+	int equals_pos = -1;
+	for (int i = 0; i < command.get_length(); i++) {
+		if (command.get_buffer()[i] == '=') {
+			equals_pos = i;
+			break;
+		}
+	}
+
+	// 할당문인 경우
+	if (equals_pos >= 0) {
+		is_assignment = true;
+
+		// 좌변과 우변 분리
+		char left_buffer[1024] = { 0 };
+		strncpy(left_buffer, command.get_buffer(), equals_pos);
+		left_side = left_buffer;
+
+		// 우변은 = 다음부터 끝까지
+		right_side = command.get_buffer() + equals_pos + 1;
+
+		// 전체 경로 파싱
+		c_assign_atom* p_atom = new c_assign_atom(&m_atom_table, &m_call_stack, this, m_char_stream.cur_line());
+		p_atom->set_system_path(left_side.get_buffer());
+		p_atom->is_system_object(true);
+		p_atom->set_var_name(left_side.get_buffer());
+
+		// 우변 토큰화 및 파싱
+		c_char_stream temp_stream;
+		temp_stream.set_temp_buffer(right_side.get_buffer());
+
+		// 임시 스트림의 토큰 가져오기
+		c_token temp_tok;
+		m_char_stream.gettok(temp_tok);
+
+		// 우변 표현식 파싱 (별도 구현 필요)
+		c_expression* p_expr = parse_system_expression(right_side.get_buffer());
+
+		if (!p_expr) {
+			error(CUR_ERR_LINE, "Cannot parse expression: %s", right_side.get_buffer());
+			delete p_atom;
+			return ERR_;
+		}
+
+		p_atom->set_expression(p_expr);
+
+		// 아톰 추가
+		m_atom_table.add(p_atom);
+
+		while (c_atom** p_last = last.pop())
+			*p_last = p_atom;
+
+		last.push(&p_atom->m_pnext);
+	}
+	else {
+		// 단순 함수/속성 접근 (구현 필요)
+		// ...
+	}
+
+	gettok(); // 다음 토큰으로 이동
+	return TO_GO;
 }

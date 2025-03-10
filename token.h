@@ -337,9 +337,10 @@ public:
 		case token_type::name:
 			m_format.format("identifier '%s'", (LPCTSTR)m_name);
 			break;
+
 		/*
 		case token_type::system:
-			m_format.format();
+			m_format.format("",);
 			break;
 		*/
 		default:
