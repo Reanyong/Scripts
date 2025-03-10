@@ -3,6 +3,8 @@
 #include "pch.h"
 #include "c_variable.h"
 #include "c_engine.h"
+#include <map>
+#include <string>
 
 // 각 객체 클래스 선언
 class CScriptGraphicObject;
@@ -92,7 +94,6 @@ bool _check_Graphic_Object(int n, VARENUM* p_types, c_string* p_msg, c_engine* p
 // 속성 접근 함수
 void __stdcall Object_GetVisible(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);
 void __stdcall Object_SetVisible(int nargs, c_variable** pargs, c_engine* p_engine);
+
 bool _check_Object_GetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 bool _check_Object_SetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
-
-void RegisterSystemObjectFunctions();

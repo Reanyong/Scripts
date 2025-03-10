@@ -64,7 +64,7 @@ void c_for_atom::exec_()
 		m_ptable->set_cur_atom(m_pexit);
 		return;
 	}
-	
+
 	static c_variable temp_val;			// static helper to increase performance
 
 	if (m_bfirst_pass)

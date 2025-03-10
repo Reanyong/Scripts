@@ -385,6 +385,141 @@ void __stdcall Object_SetVisible(int nargs, c_variable** pargs, c_engine* p_engi
     pObject->SetVisible(*pargs[1]);
 }
 
+// 외부에서 호출할 수 있는 System_SetProperty 함수 구현
+bool __cdecl System_SetProperty(const char* path, VARIANT* value)
+{
+    // 경로 형식 확인 및 파싱
+    if (!path || !value)
+        return false;
+
+    // "$System."으로 시작하는지 확인
+    if (strncmp(path, "$System.", 8) != 0)
+        return false;
+
+    // 경로를 파싱하기 위한 임시 버퍼
+    char buffer[1024] = { 0 };
+    strcpy_s(buffer, path);
+
+    // "$System." 이후의 문자열을 분석
+    char* token = buffer + 8;  // "$System." 다음 부분부터
+    char* nextToken = NULL;
+
+    // 첫 번째 토큰 분석 (예: Graphic)
+    char* component = strtok_s(token, ".()", &nextToken);
+    if (!component)
+        return false;
+
+    // Graphic 처리
+    if (_stricmp(component, "Graphic") == 0)
+    {
+        // 도면명 추출
+        char drawingName[MAX_PATH] = { 0 };
+        component = strtok_s(NULL, "\"", &nextToken);
+        if (!component)
+            return false;
+        strcpy_s(drawingName, component);
+
+        // 다음 부분 추출 (예: Object)
+        component = strtok_s(NULL, ".()", &nextToken);
+        if (!component || _stricmp(component, "Object") != 0)
+            return false;
+
+        // 객체명 추출
+        char objectName[MAX_PATH] = { 0 };
+        component = strtok_s(NULL, "\"", &nextToken);
+        if (!component)
+            return false;
+        strcpy_s(objectName, component);
+
+        // 속성명 추출
+        component = strtok_s(NULL, ".()", &nextToken);
+        if (!component)
+            return false;
+
+        // Visible 속성 처리
+        if (_stricmp(component, "Visible") == 0)
+        {
+            // CScriptObjectManager를 통해 객체 접근
+            CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
+            if (!pObject)
+                return false;
+
+            // VARIANT를 c_variable로 변환
+            c_variable val;
+            if (value->vt == VT_BOOL)
+                val = (value->boolVal != VARIANT_FALSE);
+            else if (value->vt == VT_I4)
+                val = (value->lVal != 0);
+            else
+                val = 1; // 기본값
+
+            // 가시성 설정
+            return pObject->SetVisible(val);
+        }
+        // 다른 속성 처리 (필요하면 추가)
+        // ...
+    }
+
+    return false;
+}
+
+// 스크립트 엔진에서 호출하는 확장 함수 (4개 파라미터 버전)
+void __stdcall System_SetProperty(int nargs, c_variable** pargs, c_engine* p_engine)
+{
+    // 인자 검증
+    if (nargs != 2 || pargs[0]->vt != VT_BSTR)
+        return;
+
+    c_string path;
+    pargs[0]->as_string(path);
+
+    // VARIANT 생성
+    VARIANT value;
+    VariantInit(&value);
+
+    // c_variable을 VARIANT로 변환
+    switch (pargs[1]->vt)
+    {
+    case VT_I4:
+        value.vt = VT_I4;
+        value.lVal = pargs[1]->lVal;
+        break;
+    case VT_R8:
+        value.vt = VT_R8;
+        value.dblVal = pargs[1]->dblVal;
+        break;
+    case VT_BOOL:
+        value.vt = VT_BOOL;
+        value.boolVal = pargs[1]->boolVal;
+        break;
+    case VT_BSTR:
+        value.vt = VT_BSTR;
+        value.bstrVal = SysAllocString(pargs[1]->bstrVal);
+        break;
+    default:
+        value.vt = VT_I4;
+        value.lVal = pargs[1]->as_integer();
+        break;
+    }
+
+    // 실제 구현 함수 호출
+    System_SetProperty(path.get_buffer(), &value);
+
+    // VARIANT 정리
+    VariantClear(&value);
+}
+
+// 인자 검증 함수
+bool _check_System_SetProperty(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 2)
+    {
+        *p_msg = "SetProperty 함수는 경로와 값 2개의 인자가 필요합니다.";
+        return false;
+    }
+    return true;
+}
+
 // 체크 함수 구현
 bool _check_System_Graphic(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
