@@ -19,8 +19,6 @@
 
 #include "c_str_array.h"
 
-#include "SystemObject.h"
-
 #ifndef VERIFY
 #define VERIFY	// nothing for now...
 #endif
@@ -1694,26 +1692,4 @@ DWORD c_engine::parse_disp_set(bool* p_bvar, c_vector_table& last, DWORD stop_at
 
 	gettok();
 	return TO_GO;
-}
-
-void __stdcall System_Graphic_Object_Visible(int nargs, c_variable** pargs, c_engine* pEngine, c_variable& result)
-{
-	if (nargs != 3)
-	{
-		result = false;
-		return;
-	}
-
-	c_string strGraphic, strObject, strValue;
-
-	pargs[0]->as_string(strGraphic);
-	pargs[1]->as_string(strObject);
-	pargs[2]->as_string(strValue);
-
-	bool bVisible = (strValue == "true");
-
-	SystemObject system;
-	system.getSubsystem("Graphic").getObject(strGraphic.get_buffer()).PropertyFunction().setProperty("Visible", bVisible ? "true" : "false");
-
-	result = true;
 }

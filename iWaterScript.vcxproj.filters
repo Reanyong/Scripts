@@ -222,12 +222,6 @@
     <ClCompile Include="iWaterScriptFunc.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SystemObject.cpp">
-      <Filter>Basic\System</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyFunctionManager.cpp">
-      <Filter>Basic\System</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="iWaterScript.def">
@@ -444,12 +438,6 @@
     </ClInclude>
     <ClInclude Include="iWaterScriptStruct.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemObject.h">
-      <Filter>Basic\System</Filter>
-    </ClInclude>
-    <ClInclude Include="PropertyFunctionManager.h">
-      <Filter>Basic\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

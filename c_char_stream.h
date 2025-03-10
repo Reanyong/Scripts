@@ -5,7 +5,7 @@
 #include "c_string.h"
 #include "token.h"
 
-class c_char_stream  
+class c_char_stream
 {
 	const char*	m_pdata;
 	DWORD	m_nlength;

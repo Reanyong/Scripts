@@ -199,8 +199,6 @@ protected:
 	DWORD parse_label (c_vector_table& last, DWORD stop_at);
 	DWORD parse_goto  (c_vector_table& last, DWORD stop_at);
 
-	DWORD parse_system_statement(c_vector_table& last, DWORD stop_at);
-
 	c_ext_func*		_ext_func();
 	c_dll_caller*	_dll_caller();
 
