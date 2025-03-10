@@ -80,7 +80,7 @@ void c_char_stream::gettok(c_token& curtok)
 	case '&':
 		curtok.type = (token_type)c;
 		c = get();
-		
+
 		if(curtok.type      == (token_type)'<' && c == '>') curtok.type = token_type::notequal;
 		else if(curtok.type == (token_type)'<' && c == '=') curtok.type = token_type::lesse;
 		else if(curtok.type == (token_type)'>' && c == '=') curtok.type = token_type::greatere;
@@ -131,7 +131,7 @@ void c_char_stream::gettok(c_token& curtok)
 			}
 
 			if (c) back();
-			
+
 			// label
 			if (curtok.type == token_type::eos)	// label can only be at the beginning of the line
 			{
@@ -288,11 +288,11 @@ char c_char_stream::check()
 
 bool c_char_stream::skip()
 {
-	if (m_pdata[m_ncur_pos] == '\n') 
+	if (m_pdata[m_ncur_pos] == '\n')
 		m_ncur_line ++;
 
 	++m_ncur_pos;
-	
+
 	if (m_ncur_pos > m_nlength)
 	{
 		m_ncur_pos = m_nlength;
@@ -304,7 +304,7 @@ bool c_char_stream::skip()
 
 bool c_char_stream::back()
 {
-	if (m_ncur_pos <= 0) return false; 
+	if (m_ncur_pos <= 0) return false;
 
 	--m_ncur_pos;
 
@@ -430,7 +430,7 @@ bool c_char_stream::skipline()
 	lineend();
 	if(m_ncur_pos < m_nlength) return(!skip());
 	pos(old_pos);
-	
+
 	return false;
 }
 
@@ -445,7 +445,7 @@ void c_char_stream::set_buffer(LPCTSTR pdata)
 	else
 		m_pdata = _strdup(pdata);
 	// m_pdata 가 NULL 일때 exception 발생으로 예외처리 추가 할때 사용 20220211 jkh
-	
+
 	/*if (m_pdata == NULL)
 	{
 		m_pdata = " ";
@@ -477,7 +477,7 @@ DWORD c_char_stream::pos(LPCTSTR str)
 	if (pstr == 0) return -1;
 	return (DWORD)(pstr - m_pdata);
 }
-																																																																																																																																																																																																																																																																																																																																																																																																																																																										
+
 void c_char_stream::set_temp_buffer(const char* p_str)
 {
 	if (m_ptemp_buffer)

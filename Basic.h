@@ -17,6 +17,8 @@ public:
 	{
 		return m_bSetSource;
 	}
+
+	void RegisterSystemObjectFunctions();
 public:
 
 	STDMETHOD(get_DebuggerVisible) (VARIANT_BOOL* res);

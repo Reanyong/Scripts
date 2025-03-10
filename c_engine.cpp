@@ -208,7 +208,7 @@ bool c_engine::is_keyword(const char* p_str, int n_length)
 {
 	c_string str;
 	int i = 0;
-	for (i = 0; i < n_length; i++) str += p_str[i];	
+	for (i = 0; i < n_length; i++) str += p_str[i];
 
 	for (i = 0; i < sizeof(reserved_w) / sizeof(const char*); i++)
 		if (_stricmp(reserved_w[i], str.get_buffer()) == 0) return true;
@@ -229,7 +229,7 @@ bool c_engine::is_keyword(const char* p_str, int n_length)
 bool c_engine::is_routine(const char* p_str, int n_length)
 {
 	c_string str;
-	for (int i = 0; i < n_length; i++) str += p_str[i];	
+	for (int i = 0; i < n_length; i++) str += p_str[i];
 	if (is_ext_func(str) || is_ext_sub(str)) return true;
 
 	return get_default_parent(str.get_buffer()) != 0;
@@ -289,13 +289,12 @@ bool c_engine::can_be_identifier(const char* p_name, bool b_verbose)
 	while(*p)
 	{
 		// 특수문자 추가 jkh
-		if (!isalnum(*p) && *p != '_' && *p != '$' && *p != '@' && *p != '-')
+		if (!isalnum(*p) && *p != '_' && *p != '$' && *p != '@' && *p != '-' && *p != '.')
 		{
  			if (b_verbose)
 				error(CUR_ERR_LINE, "identifier '%s' contains invalid characters.", p_name);
 			return false;
 		}
-
 		p ++;
 	}
 
@@ -351,7 +350,7 @@ bool c_engine::can_be_identifier(const char* p_name, bool b_verbose)
 					error(CUR_ERR_LINE, "attempt to use reserved word '%s' as identifier.", reserved_w[i]);
 				return false;
 			}
-		
+
 		if (is_type(p_name))
 		{
 			if (b_verbose)

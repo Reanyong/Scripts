@@ -27,7 +27,6 @@ enum class atom_type
 	disp_set_atom,
 	case_atom,
 	exit_atom,
-
 };
 
 static const char* get_atom_name(atom_type t)

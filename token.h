@@ -76,7 +76,7 @@ enum class token_type
 	endsub_cond			= 1023,
 	function_cond		= 1024,
 	endfunction_cond	= 1025,
-	
+
 	do_cond				= 1026,
 	loop_cond			= 1027,
 	until_cond			= 1028,
@@ -101,13 +101,18 @@ enum class token_type
 	exit_for_cond		= 1044,
 	exit_while_cond		= 1045,
 	exit_do_cond		= 1046,
+
+	system				= 1047,
+	graphic				= 1048,
+	object				= 1049,
+	property			= 1050,
 };
 
 //-----------------------------------------------------------------------------
 // reserved_w -----------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-static const char *reserved_w[] = 
+static const char *reserved_w[] =
 {
 	"If",
 	"Then",
@@ -139,7 +144,7 @@ static const char *reserved_w[] =
 	"EndSub",
 	"Function",
 	"EndFunction",
-	
+
 	"Do",
 	"Loop",
 	"Until",
@@ -159,6 +164,11 @@ static const char *reserved_w[] =
 	"Explicit",
 
 	"Exit",
+
+	"System",
+	"Graphic",
+	"Object",
+	"Visible",
 };
 
 #define NUM_TOKENS	(sizeof(reserved_w) / sizeof(reserved_w[0]))
@@ -195,7 +205,7 @@ static token_type reserved_cond[] =
 	token_type::endsub_cond,
 	token_type::function_cond,
 	token_type::endfunction_cond,
-	
+
 	token_type::do_cond,
 	token_type::loop_cond,
 	token_type::until_cond,
@@ -219,6 +229,13 @@ static token_type reserved_cond[] =
 	token_type::exit_cond,	// illegal by itself
 	token_type::exit_sub_cond,
 	token_type::exit_function_cond,
+
+//-----------------------
+
+	token_type::system,
+	token_type::graphic,
+	token_type::object,
+	token_type::property,
 };
 
 //-----------------------------------------------------------------------------
@@ -289,12 +306,12 @@ public:
 		case token_type::greater:	m_format = "'>'"; break;
 		case token_type::lesse:		m_format = "'<'"; break;
 		case token_type::greatere:	m_format = "'>'"; break;
-			
+
 		case token_type::not:		m_format = "not"; break;
 		case token_type::and:		m_format = "and"; break;
 		case token_type:: or:		m_format = "or"; break;
 		case token_type::xor:		m_format = "xor"; break;
-		
+
 		case token_type::eos:		m_format = "end of string"; break;
 		case token_type::eof:		m_format = "end of file"; break;
 
@@ -312,7 +329,7 @@ public:
 		case token_type::floating:
 			m_format.format("floating %f", _float);
 			break;
-			
+
 		case token_type::string:
 			m_format.format("string '%s'", (LPCTSTR)_string);
 			break;
@@ -320,7 +337,11 @@ public:
 		case token_type::name:
 			m_format.format("identifier '%s'", (LPCTSTR)m_name);
 			break;
-			
+		/*
+		case token_type::system:
+			m_format.format();
+			break;
+		*/
 		default:
 			m_format.empty();
 			_ASSERT (false);	// I must forgot something
@@ -338,7 +359,7 @@ public:
 		_int		= 0;
 		m_format.empty();
 	}
-	
+
 };
 
 #endif

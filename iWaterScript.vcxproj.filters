@@ -31,6 +31,9 @@
     <Filter Include="Basic\windows">
       <UniqueIdentifier>{41c40f96-71cb-4be7-9837-3fd85fef3d38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Basic\System">
+      <UniqueIdentifier>{41a81d7b-5f56-4d4e-9733-a2287b010744}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="iWaterScript.cpp">
@@ -218,6 +221,9 @@
     </ClCompile>
     <ClCompile Include="iWaterScriptFunc.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptSystem.cpp">
+      <Filter>Basic\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -435,6 +441,9 @@
     </ClInclude>
     <ClInclude Include="iWaterScriptStruct.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptSystem.h">
+      <Filter>Basic\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

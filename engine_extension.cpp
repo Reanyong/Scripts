@@ -1267,7 +1267,7 @@ bool c_engine::parse_disp_levels(c_string* p_parent,
 
 		// iterate through functions to check name
 
-		bool b_found;
+		bool b_found{ 0, };
 		long memid = -1;
 		_ASSERT(pta->cFuncs);
 		for (j = 0; j < pta->cFuncs; j++)
