@@ -3,6 +3,30 @@
 #include "ScriptSystem.h"
 #include "iWaterScriptFunc.h"
 
+// ScriptSystem.cpp 상단에 추가
+void DebugLog(const char* format, ...)
+{
+    FILE* logFile = fopen("c:\\temp\\script_debug.log", "a");
+    if (logFile)
+    {
+        va_list args;
+        va_start(args, format);
+        vfprintf(logFile, format, args);
+        va_end(args);
+        fprintf(logFile, "\n");
+        fclose(logFile);
+    }
+
+    // 디버그 출력창에도 표시
+    char buffer[1024];
+    va_list args;
+    va_start(args, format);
+    vsprintf_s(buffer, format, args);
+    va_end(args);
+    OutputDebugStringA(buffer);
+    OutputDebugStringA("\n");
+}
+
 int GetReturnVal(int nTimeout, ST_GLOBAL& global, char* pszBuffer)
 {
     GUID guid;
@@ -295,6 +319,8 @@ CScriptGraphic* CScriptSystem::GetGraphic(const char* graphicName)
 // 확장 함수 구현
 void __stdcall System_Graphic(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
 {
+    DebugLog("System_Graphic 함수 호출됨");
+
     if (nargs != 1 || pargs[0]->vt != VT_BSTR) {
         result = INT_MIN;
         return;
@@ -314,6 +340,9 @@ void __stdcall System_Graphic(int nargs, c_variable** pargs, c_engine* p_engine,
 
 void __stdcall Graphic_Object(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
 {
+
+    DebugLog("Graphic_Object 함수 호출됨");
+
     if (nargs != 2 || pargs[0]->vt != VT_BSTR || pargs[1]->vt != VT_BSTR) {
         result = INT_MIN;
         return;

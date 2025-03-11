@@ -103,7 +103,7 @@ void c_ptr_array<T>::grow()
 			m_pdata[i] = 0;
 		}
 	}
-		
+
 
 	m_nalloc += n_grow;
 }
@@ -212,7 +212,7 @@ void c_ptr_array<T>::remove_at(int n_pos, bool b_delete)
 	int i;
 	for (i = n_pos + 1; i < m_nsize; i++)
 		m_pdata[i - 1] = m_pdata[i];
-	
+
 	m_nsize --;
 }
 
@@ -328,7 +328,7 @@ void c_ptr_array<T>::swap (int n1, int n2)
 {
 	_ASSERT(n1 >= 0 && n1 < m_nsize);
 	_ASSERT(n2 >= 0 && n2 < m_nsize);
-	
+
 	T* p = m_pdata[n1];
 	m_pdata[n1] = m_pdata[n2];
 	m_pdata[n2] = p;
