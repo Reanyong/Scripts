@@ -195,7 +195,7 @@ static token_type reserved_cond[] =
 	token_type::reminder,
 	token_type::not,
 	token_type::and,
-	token_type:: or,
+	token_type::or,
 	token_type::xor,
 	token_type::dialog_cond,
 	token_type::enddialog_cond,
@@ -309,7 +309,7 @@ public:
 
 		case token_type::not:		m_format = "not"; break;
 		case token_type::and:		m_format = "and"; break;
-		case token_type:: or:		m_format = "or"; break;
+		case token_type::or:		m_format = "or"; break;
 		case token_type::xor:		m_format = "xor"; break;
 
 		case token_type::eos:		m_format = "end of string"; break;
@@ -338,11 +338,6 @@ public:
 			m_format.format("identifier '%s'", (LPCTSTR)m_name);
 			break;
 
-		/*
-		case token_type::system:
-			m_format.format("",);
-			break;
-		*/
 		default:
 			m_format.empty();
 			_ASSERT (false);	// I must forgot something
