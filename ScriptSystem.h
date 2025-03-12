@@ -27,6 +27,8 @@ public:
 
     void Clear();
     ~CScriptObjectManager();
+
+    static void DestroyInstance();
 };
 
 // 그래픽 객체 (도면 내 개별 요소)

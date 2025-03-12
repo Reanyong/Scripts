@@ -3676,7 +3676,6 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 {
 	// $System으로 시작하는 명령 전체 파싱
 	c_string command = curtok.m_name;
-	// 예: $System.Graphic("도면명").Object("객체명").Visible = true
 
 	bool is_assignment = false;
 	c_string left_side;
@@ -3698,7 +3697,6 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 		strncpy(left_buffer, command.get_buffer(), equals_pos);
 		left_side = left_buffer;
 
-		// 우변은 = 다음부터 끝까지
 		right_side = command.get_buffer() + equals_pos + 1;
 
 		// 전체 경로 파싱
@@ -3735,8 +3733,7 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 		// 단순 함수/속성 접근 (구현 필요)
 		// ...
 	}
-
-	gettok(); // 다음 토큰으로 이동
+	gettok();
 	return TO_GO;
 }
 
@@ -3744,11 +3741,16 @@ c_expression* c_engine::parse_system_expression(const char* expr_str)
 {
 	c_expression* p_expr = new c_expression(&m_call_stack, &m_atom_table, this);
 
-	if (_stricmp(expr_str, "true") == 0) {
+	const char* trimmed_expr = expr_str;
+	while (*trimmed_expr && isspace(*trimmed_expr)) {
+		trimmed_expr++;
+	}
+
+	if (_strnicmp(trimmed_expr, "true", 4) == 0) {
 		p_expr->m_action = c_action::_const;
 		p_expr->m_constant = true;
 	}
-	else if (_stricmp(expr_str, "false") == 0) {
+	else if (_strnicmp(trimmed_expr, "false", 5) == 0) {
 		p_expr->m_action = c_action::_const;
 		p_expr->m_constant = false;
 	}

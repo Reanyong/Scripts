@@ -728,7 +728,6 @@ void __stdcall ClosePicture(int nargs, c_variable** pargs, c_engine* p_engine, c
 	ZeroMemory(&global, sizeof(ST_GLOBAL));
 	global.nMode = GM_GV_CLOSEPAGE;
 
-
 	c_string a, b, c;
 	pargs[0]->as_string(a);
 	//pargs[1]->as_string(b);

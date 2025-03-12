@@ -32,7 +32,6 @@ int WaterScript::ScriptInit(HWND hOwner, CTagCollector* pTagCol,BOOL bRoop, int 
 
 	sprintf_s(szBuf, "%s\\iwater.ini", g_szDirPathiSchdule);
 	GetPrivateProfileString("iwater", "Project", "", szProject, sizeof(szProject), szBuf);
-
 	GetPrivateProfileString("iwater", "SetUp_Path", "", szSetUpPath, sizeof(szSetUpPath), szBuf);
 	CStringArray ArrXmlNode;
 	//C

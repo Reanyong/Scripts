@@ -29,106 +29,84 @@ void DebugLog(const char* format, ...)
 
 int GetReturnVal(int nTimeout, ST_GLOBAL& global, char* pszBuffer)
 {
-    GUID guid;
-    CoCreateGuid(&guid);
-
-    sprintf(global.szParms7, "\\\\.\\mailslot\\%x%x%x%x%x%x%x%x%x%x%x", guid.Data1, guid.Data2, guid.Data3,
-        guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
-        guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
-
-    HANDLE hMailslot = CreateMailslot(global.szParms7,
-        1024,
-        MAILSLOT_WAIT_FOREVER,
-        NULL);
-
-    if (hMailslot == INVALID_HANDLE_VALUE)
-    {
-        return -1;
-    }
-
-    COPYDATASTRUCT cds;
-    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
-    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
-    cds.cbData = sizeof(ST_GLOBAL);
-    cds.lpData = &global;
-
-    if (!KWSendMsgToViewer(cds))
-    {
-        CloseHandle(hMailslot);
-        return -2;
-    }
-
+    HANDLE hMailslot = INVALID_HANDLE_VALUE;
     BOOL bReadSucc = FALSE;
-    ULONGLONG ull = GetTickCount64();
 
-    try
-    {
-        for (;;)
-        {
+    try {
+        GUID guid;
+        CoCreateGuid(&guid);
+
+        sprintf(global.szParms7, "\\\\.\\mailslot\\%x%x%x%x%x%x%x%x%x%x%x", guid.Data1, guid.Data2, guid.Data3,
+            guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
+            guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+
+        hMailslot = CreateMailslot(global.szParms7, 1024, MAILSLOT_WAIT_FOREVER, NULL);
+        if (hMailslot == INVALID_HANDLE_VALUE) {
+            return -1;
+        }
+
+        COPYDATASTRUCT cds;
+        ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+        cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+        cds.cbData = sizeof(ST_GLOBAL);
+        cds.lpData = &global;
+
+        if (!KWSendMsgToViewer(cds)) {
+            CloseHandle(hMailslot);
+            return -2;
+        }
+
+        ULONGLONG ull = GetTickCount64();
+
+        for (;;) {
             DWORD msgSize;
             BOOL err = GetMailslotInfo(hMailslot, 0, &msgSize, 0, 0);
 
-            if (!err)
-            {
-                goto err_exit;
+            if (!err) {
+                break;  // 정보를 가져오는 데 실패하면 종료
             }
 
-            if (msgSize != (DWORD)MAILSLOT_NO_MESSAGE)
-            {
+            if (msgSize != (DWORD)MAILSLOT_NO_MESSAGE) {
                 void* buffer = GlobalAlloc(GMEM_FIXED, msgSize);
-                if (!buffer)
-                {
-                    // 메모리 할당 실패
-                }
-                else
-                {
+                if (buffer) {  // 할당에 성공했을 때만 진행
                     DWORD numRead;
                     err = ReadFile(hMailslot, buffer, msgSize, &numRead, 0);
 
-                    if (!err)
-                    {
-                        // 읽기 실패
-                    }
-                    else if (msgSize != numRead)
-                    {
-                        // 바이트 수 불일치
-                    }
-                    else
-                    {
+                    if (err && msgSize == numRead) {
                         bReadSucc = TRUE;
                         sprintf(pszBuffer, (char*)buffer);
                         pszBuffer[msgSize] = 0;
                     }
 
-                    GlobalFree(buffer);
+                    GlobalFree(buffer);  // 어떤 경우든 할당된 메모리 해제
                 }
             }
 
-            if (bReadSucc == TRUE)
-            {
+            if (bReadSucc == TRUE) {
                 break;
             }
 
-            if ((DWORD)nTimeout < GetTickCount64() - ull)
-            {
+            if ((DWORD)nTimeout < GetTickCount64() - ull) {
                 break;
             }
 
             Sleep(5);
         }
     }
-    catch (...)
-    {
-        // 예외 처리
+    catch (...) {
+        // 예외 발생 시 리소스 정리
+        if (hMailslot != INVALID_HANDLE_VALUE) {
+            CloseHandle(hMailslot);
+        }
+        return -1;
     }
 
-err_exit:
-    CloseHandle(hMailslot);
+    // 항상 핸들 닫기
+    if (hMailslot != INVALID_HANDLE_VALUE) {
+        CloseHandle(hMailslot);
+    }
 
-    if (bReadSucc == TRUE)
-        return 1;
-
-    return -1;
+    return bReadSucc ? 1 : -1;
 }
 
 // 싱글톤 초기화
@@ -466,7 +444,7 @@ bool __cdecl System_SetProperty(const char* path, VARIANT* value)
             return false;
 
         // Visible 속성 처리
-        if (_stricmp(component, "Visible") == 0)
+        if (_strnicmp(component, "Visible", 7) == 0)
         {
             // CScriptObjectManager를 통해 객체 접근
             CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
@@ -506,7 +484,8 @@ void __stdcall System_SetProperty(int nargs, c_variable** pargs, c_engine* p_eng
     VARIANT value;
     VariantInit(&value);
 
-    // c_variable을 VARIANT로 변환
+    HRESULT hr = S_OK;
+
     switch (pargs[1]->vt)
     {
     case VT_I4:
@@ -584,4 +563,12 @@ bool _check_Object_SetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine
         return false;
     }
     return true;
+}
+
+void CScriptObjectManager::DestroyInstance()
+{
+    if (s_instance) {
+        delete s_instance;
+        s_instance = nullptr;
+    }
 }

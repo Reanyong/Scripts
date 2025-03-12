@@ -25,7 +25,7 @@ class c_atom_table
 	c_engine*		m_pengine;
 	bool			m_bwaiting;		// witing for event
 	bool			m_bforce_stop;
-	
+
 	void run_();					// main loop where atoms are executed
 
 	bool find_entry_atom();
@@ -96,7 +96,7 @@ public:
 #ifdef _DEBUG
 	void dump();
 #endif
-	
+
 	friend class c_engine;
 	friend class c_atom;
 };
