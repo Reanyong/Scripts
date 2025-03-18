@@ -204,7 +204,7 @@ protected:
 
 	DWORD parse_system_command(c_vector_table& last, DWORD stop_at);
 
-	c_expression* c_engine::parse_system_expression(const char* expr_str);
+	c_expression* parse_system_expression(const char* expr_str, const char* prop_path = nullptr);
 
 // LPDISPATCH-related parsing -------------------------------------------------
 

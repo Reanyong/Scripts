@@ -229,7 +229,7 @@ public:
 	c_variable(c_variable& v);
 
 	~c_variable();
-	
+
 	inline void reset();
 	void store(c_var_storage* p_storage);
 	void restore(c_var_storage* p_storage);
@@ -248,7 +248,7 @@ public:
 
 	inline void set_clsid_iid(CLSID* p_clsid, GUID* p_iid);
 
-	void from_input(LPCTSTR str);			// assign value from input string 
+	void from_input(LPCTSTR str);			// assign value from input string
 											// automaticaly detecting type
 
 	void create_object();
