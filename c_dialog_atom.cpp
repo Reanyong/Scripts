@@ -17,7 +17,7 @@ c_dialog_atom::c_dialog_atom(c_atom_table* ptable,
 	m_type			= atom_type::dialog_atom;
 	m_pnext			= 0;
 	m_prev_run_mode	= run_mode::run_undef;
-	
+
 	m_pdialog		= p_dialog;
 }
 
@@ -33,7 +33,7 @@ void c_dialog_atom::set_title(LPCTSTR p_title)
 void c_dialog_atom::add(LPCTSTR p_title, LPCTSTR p_varname)
 {
 	m_titles.add(p_title);
-	
+
 
 	c_var_desc* p_var_desc = m_var_desc_array.add_new();
 	*p_var_desc = p_varname;
@@ -57,7 +57,7 @@ void c_dialog_atom::exec_()
 	m_pdialog->show();
 	m_prev_run_mode = m_ptable->get_run_mode();
 
-//	ResetEvent(m_pengine->get_io_event());	
+//	ResetEvent(m_pengine->get_io_event());
 //	DWORD res = WaitForSingleObject(m_pengine->get_io_event(), INFINITE);
 //	_ASSERT(res == WAIT_OBJECT_0);
 //	ResetEvent(m_pengine->get_io_event());

@@ -24,4 +24,6 @@
 extern CTagCollector* g_pTagCol;
 extern char g_szLocalModNode[64];
 
+void DebugLog(const char* format, ...);
+
 #endif //PCH_H

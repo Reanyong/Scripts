@@ -165,10 +165,12 @@ bool c_engine::_pre_parse()
 				curtok.type == token_type::object ||
 				(curtok.m_name[0] == '$' && _stricmp(curtok.m_name.get_buffer(), "$System") == 0))
 			{
+				/*
 				// $System 관련 구문은 건너뜁니다
 				while (curtok.type != token_type::eos && curtok.type != token_type::eof)
 					gettok();
 				continue;
+				*/
 			}
 			if (curtok.type == token_type::declare_cond)
 			{
@@ -3674,8 +3676,9 @@ bool c_engine::_post_parse()
 
 DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 {
-	// $System으로 시작하는 명령 전체 파싱
+	// $System으로 시작하는 명령 처리
 	c_string command = curtok.m_name;
+	DebugLog("$System 명령 파싱: %s", command.get_buffer());
 
 	bool is_assignment = false;
 	c_string left_side;
@@ -3692,36 +3695,66 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 
 	if (equals_pos >= 0) {
 		is_assignment = true;
+		DebugLog("할당 명령 감지됨");
 
 		char left_buffer[1024] = { 0 };
-		strncpy(left_buffer, command.get_buffer(), equals_pos);
+		strncpy_s(left_buffer, command.get_buffer(), equals_pos);
 		left_side = left_buffer;
 
 		right_side = command.get_buffer() + equals_pos + 1;
+		while (*right_side.get_buffer() && isspace(*right_side.get_buffer())) {
+			right_side = right_side.get_buffer() + 1;
+		}
 
-		// 전체 경로 파싱
+		DebugLog("좌변: %s, 우변: %s", left_side.get_buffer(), right_side.get_buffer());
+
+		// c_assign_atom 생성
 		c_assign_atom* p_atom = new c_assign_atom(&m_atom_table, &m_call_stack, this, m_char_stream.cur_line());
 		p_atom->set_system_path(left_side.get_buffer());
 		p_atom->is_system_object(true);
 		p_atom->set_var_name(left_side.get_buffer());
 
-		c_char_stream temp_stream;
-		temp_stream.set_temp_buffer(right_side.get_buffer());
+		// 여기서 중요한 디버그 로그 추가
+		DebugLog("생성된 atom 정보: 타입=%d, 라인=%d, 주소=%p",
+			p_atom->m_type, p_atom->m_nline, p_atom);
 
-		c_token temp_tok;
-		m_char_stream.gettok(temp_tok);
+		// 표현식 처리
+		c_expression* p_expr = parse_system_expression(right_side.get_buffer(), left_side.get_buffer());
+		if (p_expr) {
+			p_atom->set_expression(p_expr);
+		}
 
-		c_expression* p_expr = parse_system_expression(right_side.get_buffer());
+		// VARIANT 생성 및 System_SetProperty 함수 호출
+		class VariantGuard {
+		public:
+			VariantGuard() { VariantInit(&var); }
+			~VariantGuard() { VariantClear(&var); }
+			VARIANT var;
+		} vg;
 
-		if (!p_expr) {
-			error(CUR_ERR_LINE, "Cannot parse expression: %s", right_side.get_buffer());
+		//System_SetProperty(left_side.get_buffer(), &vg.var);
+
+		switch (p_expr->m_constant.vt)
+		{
+		case VT_BOOL:
+			vg.var.vt = VT_BOOL;
+			vg.var.boolVal = p_expr->m_constant.boolVal;
+			break;
+		case VT_I4:
+			vg.var.vt = VT_I4;
+			vg.var.lVal = p_expr->m_constant.lVal;
+			break;
+		case VT_BSTR:
+			vg.var.vt = VT_BSTR;
+			vg.var.bstrVal = SysAllocString(p_expr->m_constant.bstrVal);
+			break;
+		default:
+			DebugLog("오류: 지원되지 않는 표현식 타입 (타입: %d)", p_expr->m_constant.vt);
+			error(m_char_stream.cur_line(), "지원되지 않는 속성 값 타입이 사용되었습니다");
 			delete p_atom;
 			return ERR_;
 		}
 
-		p_atom->set_expression(p_expr);
-
-		// 아톰 추가
 		m_atom_table.add(p_atom);
 
 		while (c_atom** p_last = last.pop())
@@ -3730,15 +3763,21 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 		last.push(&p_atom->m_pnext);
 	}
 	else {
-		// 단순 함수/속성 접근 (구현 필요)
-		// ...
+		DebugLog("비할당 명령 감지됨 - 처리 안함");
+		return ERR_;    // 오류 반환
 	}
+
 	gettok();
 	return TO_GO;
 }
 
-c_expression* c_engine::parse_system_expression(const char* expr_str)
+c_expression* c_engine::parse_system_expression(const char* expr_str, const char* prop_path)
 {
+	if (!expr_str || !prop_path) {
+		error(CUR_ERR_LINE, "Invalid null expression or property path");
+		return nullptr;
+	}
+
 	c_expression* p_expr = new c_expression(&m_call_stack, &m_atom_table, this);
 
 	const char* trimmed_expr = expr_str;
@@ -3746,17 +3785,54 @@ c_expression* c_engine::parse_system_expression(const char* expr_str)
 		trimmed_expr++;
 	}
 
-	if (_strnicmp(trimmed_expr, "true", 4) == 0) {
-		p_expr->m_action = c_action::_const;
-		p_expr->m_constant = true;
+	// 변수 참조 여부 확인
+	bool is_variable = false;
+	if (isalpha(trimmed_expr[0]) || trimmed_expr[0] == '_' || trimmed_expr[0] == '@') {
+		is_variable = true;
+
+		// 예약어 확인
+		if (_strnicmp(trimmed_expr, "true", 4) == 0 &&
+			(trimmed_expr[4] == '\0' || isspace(trimmed_expr[4]))) {
+			is_variable = false;
+		}
+		else if (_strnicmp(trimmed_expr, "false", 5) == 0 &&
+			(trimmed_expr[5] == '\0' || isspace(trimmed_expr[5]))) {
+			is_variable = false;
+		}
 	}
-	else if (_strnicmp(trimmed_expr, "false", 5) == 0) {
-		p_expr->m_action = c_action::_const;
-		p_expr->m_constant = false;
+
+	if (is_variable) {
+		p_expr->m_action = c_action::_variable;
+		p_expr->set_var_name(trimmed_expr);
+
+		if (strstr(prop_path, ".Visible") != NULL) {
+			// 변수 참조 가능 여부 확인
+			c_variable* p_var = nullptr;
+		}
 	}
-	else {
-		// 다른 표현식 파싱
-		//
+	else if (strstr(prop_path, ".Visible") != NULL)
+	{
+		p_expr->m_action = c_action::_const;
+
+		if (_strnicmp(trimmed_expr, "true", 4) == 0 ||
+			(trimmed_expr[0] == '1' && (trimmed_expr[1] == '\0' || isspace(trimmed_expr[1])))) {
+			p_expr->m_constant = true;
+		}
+		else if (_strnicmp(trimmed_expr, "false", 5) == 0 ||
+			(trimmed_expr[0] == '0' && (trimmed_expr[1] == '\0' || isspace(trimmed_expr[1])))) {
+			p_expr->m_constant = false;
+		}
+		else {
+			char* endptr;
+			long value = strtol(trimmed_expr, &endptr, 10);
+
+			error(CUR_ERR_LINE, "Visible 속성에는 'true', 'false', '0', '1'만 허용됩니다 (입력값: '%s')", trimmed_expr);
+		}
+	}
+	else
+	{
+		p_expr->m_action = c_action::_const;
+		p_expr->m_constant = trimmed_expr;
 	}
 
 	return p_expr;

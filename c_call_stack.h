@@ -7,7 +7,7 @@ class c_atom;
 class c_engine;
 struct c_dim_entry;
 
-class c_call_stack  
+class c_call_stack
 {
 	c_ptr_array<c_name_table>	m_name_tables;		// nametable for each level
 	c_array<c_atom*>			m_rets;				// returns from routines

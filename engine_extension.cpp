@@ -280,9 +280,12 @@ void c_engine::add_standard_extension_functions()
 
 	VERIFY(add_extension_function("$System.Graphic",(PEXTENSION_FUNCTION_FUNCTION)System_Graphic,_check_System_Graphic));
 	VERIFY(add_extension_function("Graphic.Object",(PEXTENSION_FUNCTION_FUNCTION)Graphic_Object,_check_Graphic_Object));
+
 	VERIFY(add_extension_function("Object.Visible",(PEXTENSION_FUNCTION_FUNCTION)Object_GetVisible,_check_Object_GetVisible));
 	//VERIFY(add_extension_sub("Object.Visible", (PEXTENSION_SUB_FUNCTION)Object_SetVisible, _check_Object_SetVisible));
 
+	VERIFY(add_extension_function("Object.AddString", (PEXTENSION_FUNCTION_FUNCTION)Object_GetAddString, _check_Object_GetAddString));
+	//VERIFY(add_extension_sub("Object.AddString", (PEXTENSION_SUB_FUNCTION)Object_SetAddString, _check_Object_SetAddString));
 }
 
 void c_engine::add_standard_extension_subs()
@@ -303,7 +306,7 @@ void c_engine::add_standard_extension_subs()
 	VERIFY(add_extension_sub("DbgPrint",		DbgPrint,		_check_DbgPrint));
 
 	//20210402 YYYY-MM-DD HH:MM:SS.MIL À» Âï¾îº¸ÀÚ DbgPrintMil
-	VERIFY(add_extension_sub("DbgPrintMil", DbgPrintMil,		_check_DbgPrintMil));
+	VERIFY(add_extension_sub("DbgPrintMil",		DbgPrintMil,		_check_DbgPrintMil));
 
 	VERIFY(add_extension_sub("DbgLog",			DbgLog,			_check_DbgLog));
 	VERIFY(add_extension_sub("DbgBreak",		DbgBreak,		_check_DbgBreak));

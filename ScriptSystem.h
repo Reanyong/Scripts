@@ -44,8 +44,13 @@ public:
     const char* GetGraphicName() { return m_graphicName.get_buffer(); }
     const char* GetObjectName() { return m_objectName.get_buffer(); }
 
+    // 20250310 System-Obejct_Visible
     bool GetVisible(c_variable& result);
     bool SetVisible(c_variable& value);
+
+    // 20250312 System-Obejct_AddString
+    bool GetAddString(c_variable& result);
+    bool SetAddString(c_variable& value);
 
     // 眠啊 加己
     bool GetText(c_variable& result);
@@ -94,8 +99,19 @@ void __stdcall Graphic_Object(int nargs, c_variable** pargs, c_engine* p_engine,
 bool _check_Graphic_Object(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 
 // 加己 立辟 窃荐
+// System-Object-Visible
 void __stdcall Object_GetVisible(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);
 void __stdcall Object_SetVisible(int nargs, c_variable** pargs, c_engine* p_engine);
-
 bool _check_Object_GetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 bool _check_Object_SetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
+
+// System-Object-AddString
+void __stdcall Object_GetAddString(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);
+void __stdcall Object_SetAddString(int nargs, c_variable** pargs, c_engine* p_engine);
+bool _check_Object_GetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
+bool _check_Object_SetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
+
+
+
+
+

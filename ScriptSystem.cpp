@@ -1,31 +1,7 @@
-// ScriptSystem.cpp
+ï»¿// ScriptSystem.cpp
 #include "pch.h"
 #include "ScriptSystem.h"
 #include "iWaterScriptFunc.h"
-
-// ScriptSystem.cpp »ó´Ü¿¡ Ãß°¡
-void DebugLog(const char* format, ...)
-{
-    FILE* logFile = fopen("c:\\temp\\script_debug.log", "a");
-    if (logFile)
-    {
-        va_list args;
-        va_start(args, format);
-        vfprintf(logFile, format, args);
-        va_end(args);
-        fprintf(logFile, "\n");
-        fclose(logFile);
-    }
-
-    // µğ¹ö±× Ãâ·ÂÃ¢¿¡µµ Ç¥½Ã
-    char buffer[1024];
-    va_list args;
-    va_start(args, format);
-    vsprintf_s(buffer, format, args);
-    va_end(args);
-    OutputDebugStringA(buffer);
-    OutputDebugStringA("\n");
-}
 
 int GetReturnVal(int nTimeout, ST_GLOBAL& global, char* pszBuffer)
 {
@@ -63,12 +39,12 @@ int GetReturnVal(int nTimeout, ST_GLOBAL& global, char* pszBuffer)
             BOOL err = GetMailslotInfo(hMailslot, 0, &msgSize, 0, 0);
 
             if (!err) {
-                break;  // Á¤º¸¸¦ °¡Á®¿À´Â µ¥ ½ÇÆĞÇÏ¸é Á¾·á
+                break;  // ì •ë³´ë¥¼ ê°€ì ¸ì˜¤ëŠ” ë° ì‹¤íŒ¨í•˜ë©´ ì¢…ë£Œ
             }
 
             if (msgSize != (DWORD)MAILSLOT_NO_MESSAGE) {
                 void* buffer = GlobalAlloc(GMEM_FIXED, msgSize);
-                if (buffer) {  // ÇÒ´ç¿¡ ¼º°øÇßÀ» ¶§¸¸ ÁøÇà
+                if (buffer) {  // í• ë‹¹ì— ì„±ê³µí–ˆì„ ë•Œë§Œ ì§„í–‰
                     DWORD numRead;
                     err = ReadFile(hMailslot, buffer, msgSize, &numRead, 0);
 
@@ -78,7 +54,7 @@ int GetReturnVal(int nTimeout, ST_GLOBAL& global, char* pszBuffer)
                         pszBuffer[msgSize] = 0;
                     }
 
-                    GlobalFree(buffer);  // ¾î¶² °æ¿ìµç ÇÒ´çµÈ ¸Ş¸ğ¸® ÇØÁ¦
+                    GlobalFree(buffer);  // ì–´ë–¤ ê²½ìš°ë“  í• ë‹¹ëœ ë©”ëª¨ë¦¬ í•´ì œ
                 }
             }
 
@@ -94,14 +70,14 @@ int GetReturnVal(int nTimeout, ST_GLOBAL& global, char* pszBuffer)
         }
     }
     catch (...) {
-        // ¿¹¿Ü ¹ß»ı ½Ã ¸®¼Ò½º Á¤¸®
+        // ì˜ˆì™¸ ë°œìƒ ì‹œ ë¦¬ì†ŒìŠ¤ ì •ë¦¬
         if (hMailslot != INVALID_HANDLE_VALUE) {
             CloseHandle(hMailslot);
         }
         return -1;
     }
 
-    // Ç×»ó ÇÚµé ´İ±â
+    // í•­ìƒ í•¸ë“¤ ë‹«ê¸°
     if (hMailslot != INVALID_HANDLE_VALUE) {
         CloseHandle(hMailslot);
     }
@@ -109,15 +85,19 @@ int GetReturnVal(int nTimeout, ST_GLOBAL& global, char* pszBuffer)
     return bReadSucc ? 1 : -1;
 }
 
-// ½Ì±ÛÅæ ÃÊ±âÈ­
+// ì‹±ê¸€í†¤ ì´ˆê¸°í™”
 CScriptObjectManager* CScriptObjectManager::s_instance = nullptr;
 
 CScriptObjectManager* CScriptObjectManager::GetInstance()
 {
+    /*
     if (s_instance == nullptr) {
         s_instance = new CScriptObjectManager();
     }
     return s_instance;
+    */
+    static CScriptObjectManager s_instance;  // C++11 ì´ìƒì—ì„œ ìŠ¤ë ˆë“œ ì•ˆì „
+    return &s_instance;
 }
 
 CScriptObjectManager::~CScriptObjectManager()
@@ -127,30 +107,32 @@ CScriptObjectManager::~CScriptObjectManager()
 
 void CScriptObjectManager::Clear()
 {
-    // ±×·¡ÇÈ °´Ã¼µé Á¤¸®
+    // ê·¸ë˜í”½ ê°ì²´ë“¤ ì •ë¦¬
     for (auto& pair : m_graphics) {
         delete pair.second;
     }
     m_graphics.clear();
 
-    // °³º° °´Ã¼µé Á¤¸®
+    // ê°œë³„ ê°ì²´ë“¤ ì •ë¦¬
     for (auto& pair : m_objects) {
         delete pair.second;
     }
     m_objects.clear();
+
+    DestroyInstance();
 }
 
 CScriptGraphic* CScriptObjectManager::GetGraphic(const char* name)
 {
     std::string key = name;
 
-    // ±âÁ¸ °´Ã¼°¡ ÀÖÀ¸¸é ¹İÈ¯
+    // ê¸°ì¡´ ê°ì²´ê°€ ìˆìœ¼ë©´ ë°˜í™˜
     auto it = m_graphics.find(key);
     if (it != m_graphics.end()) {
         return it->second;
     }
 
-    // ¾øÀ¸¸é »õ·Î »ı¼º
+    // ì—†ìœ¼ë©´ ìƒˆë¡œ ìƒì„±
     CScriptGraphic* pGraphic = new CScriptGraphic(name);
     m_graphics[key] = pGraphic;
     return pGraphic;
@@ -160,19 +142,19 @@ CScriptGraphicObject* CScriptObjectManager::GetObject(const char* graphicName, c
 {
     std::string key = std::string(graphicName) + "::" + objectName;
 
-    // ±âÁ¸ °´Ã¼°¡ ÀÖÀ¸¸é ¹İÈ¯
+    // ê¸°ì¡´ ê°ì²´ê°€ ìˆìœ¼ë©´ ë°˜í™˜
     auto it = m_objects.find(key);
     if (it != m_objects.end()) {
         return it->second;
     }
 
-    // ¾øÀ¸¸é »õ·Î »ı¼º
+    // ì—†ìœ¼ë©´ ìƒˆë¡œ ìƒì„±
     CScriptGraphicObject* pObject = new CScriptGraphicObject(graphicName, objectName);
     m_objects[key] = pObject;
     return pObject;
 }
 
-// ±×·¡ÇÈ °´Ã¼ ±¸Çö
+// ê·¸ë˜í”½ ê°ì²´ êµ¬í˜„
 CScriptGraphicObject::CScriptGraphicObject(const char* graphicName, const char* objectName)
     : m_graphicName(graphicName), m_objectName(objectName)
 {
@@ -180,7 +162,7 @@ CScriptGraphicObject::CScriptGraphicObject(const char* graphicName, const char* 
 
 bool CScriptGraphicObject::GetVisible(c_variable& result)
 {
-    // Viewer¿¡ °´Ã¼ °¡½Ã¼º »óÅÂ ¿äÃ»
+    // Viewerì— ê°ì²´ ê°€ì‹œì„± ìƒíƒœ ìš”ì²­
     ST_GLOBAL global;
     ZeroMemory(&global, sizeof(ST_GLOBAL));
     global.nMode = GM_GV_Get_OBJVISBLE;
@@ -208,7 +190,7 @@ bool CScriptGraphicObject::GetVisible(c_variable& result)
 
 bool CScriptGraphicObject::SetVisible(c_variable& value)
 {
-    // Viewer¿¡ °´Ã¼ °¡½Ã¼º º¯°æ ¿äÃ»
+    // Viewerì— ê°ì²´ ê°€ì‹œì„± ë³€ê²½ ìš”ì²­
     ST_GLOBAL global;
     ZeroMemory(&global, sizeof(ST_GLOBAL));
     global.nMode = GM_GV_OBJVISBLE;
@@ -226,9 +208,59 @@ bool CScriptGraphicObject::SetVisible(c_variable& value)
     return KWSendMsgToViewer(cds);
 }
 
+bool CScriptGraphicObject::GetAddString(c_variable& result)
+{
+    ST_GLOBAL global;
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_Get_OBJADDSTRING;
+
+    strcpy_s(global.szParms1, m_graphicName.get_buffer());
+    strcpy_s(global.szParms2, m_objectName.get_buffer());
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    char buf[1024] = { 0 };
+    int nRet = GetReturnVal(3000, global, buf);
+
+    result.vt = VT_BSTR;
+    CString sValue = "";
+
+    if (nRet == 1)
+        sValue = buf;
+
+    result.bstrVal = sValue.AllocSysString();
+    return (nRet == 1);
+}
+
+bool CScriptGraphicObject::SetAddString(c_variable& value)
+{
+    ST_GLOBAL global;
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_OBJADDSTRING;
+
+    c_string strValue;
+    value.as_string(strValue);
+
+    strcpy_s(global.szParms1, m_graphicName.get_buffer());
+    strcpy_s(global.szParms2, m_objectName.get_buffer());
+    strcpy_s(global.szParms3, strValue.get_buffer());
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    return KWSendMsgToViewer(cds);
+}
+
 bool CScriptGraphicObject::GetText(c_variable& result)
 {
-    // Viewer¿¡ °´Ã¼ ÅØ½ºÆ® »óÅÂ ¿äÃ»
+    // Viewerì— ê°ì²´ í…ìŠ¤íŠ¸ ìƒíƒœ ìš”ì²­
     ST_GLOBAL global;
     ZeroMemory(&global, sizeof(ST_GLOBAL));
     global.nMode = GM_GV_Get_OBJTEXT;
@@ -256,7 +288,7 @@ bool CScriptGraphicObject::GetText(c_variable& result)
 
 bool CScriptGraphicObject::SetText(c_variable& value)
 {
-    // Viewer¿¡ °´Ã¼ ÅØ½ºÆ® º¯°æ ¿äÃ»
+    // Viewerì— ê°ì²´ í…ìŠ¤íŠ¸ ë³€ê²½ ìš”ì²­
     ST_GLOBAL global;
     ZeroMemory(&global, sizeof(ST_GLOBAL));
     global.nMode = GM_GV_OBJTEXT;
@@ -277,7 +309,7 @@ bool CScriptGraphicObject::SetText(c_variable& value)
     return KWSendMsgToViewer(cds);
 }
 
-// ±×·¡ÇÈ Å¬·¡½º ±¸Çö
+// ê·¸ë˜í”½ í´ë˜ìŠ¤ êµ¬í˜„
 CScriptGraphic::CScriptGraphic(const char* name)
     : m_name(name)
 {
@@ -288,16 +320,16 @@ CScriptGraphicObject* CScriptGraphic::GetObject(const char* objectName)
     return CScriptObjectManager::GetInstance()->GetObject(m_name.get_buffer(), objectName);
 }
 
-// ½Ã½ºÅÛ Å¬·¡½º ±¸Çö
+// ì‹œìŠ¤í…œ í´ë˜ìŠ¤ êµ¬í˜„
 CScriptGraphic* CScriptSystem::GetGraphic(const char* graphicName)
 {
     return CScriptObjectManager::GetInstance()->GetGraphic(graphicName);
 }
 
-// È®Àå ÇÔ¼ö ±¸Çö
+// í™•ì¥ í•¨ìˆ˜ êµ¬í˜„
 void __stdcall System_Graphic(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
 {
-    DebugLog("System_Graphic ÇÔ¼ö È£ÃâµÊ");
+    DebugLog("System_Graphic í•¨ìˆ˜ í˜¸ì¶œë¨");
 
     if (nargs != 1 || pargs[0]->vt != VT_BSTR) {
         result = INT_MIN;
@@ -307,19 +339,19 @@ void __stdcall System_Graphic(int nargs, c_variable** pargs, c_engine* p_engine,
     c_string graphicName;
     pargs[0]->as_string(graphicName);
 
-    // ±×·¡ÇÈ °´Ã¼ °íÀ¯ ID »ı¼º (¸Ş¸ğ¸® ÁÖ¼Ò¸¦ ¹®ÀÚ¿­·Î º¯È¯)
+    // ê·¸ë˜í”½ ê°ì²´ ê³ ìœ  ID ìƒì„± (ë©”ëª¨ë¦¬ ì£¼ì†Œë¥¼ ë¬¸ìì—´ë¡œ ë³€í™˜)
     CScriptGraphic* pGraphic = CScriptSystem::GetGraphic(graphicName.get_buffer());
     char buffer[32];
     sprintf_s(buffer, "_GRAPHIC_%p", pGraphic);
 
-    // ¹®ÀÚ¿­·Î ¹İÈ¯
+    // ë¬¸ìì—´ë¡œ ë°˜í™˜
     result = buffer;
 }
 
 void __stdcall Graphic_Object(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
 {
 
-    DebugLog("Graphic_Object ÇÔ¼ö È£ÃâµÊ");
+    DebugLog("Graphic_Object í•¨ìˆ˜ í˜¸ì¶œë¨");
 
     if (nargs != 2 || pargs[0]->vt != VT_BSTR || pargs[1]->vt != VT_BSTR) {
         result = INT_MIN;
@@ -330,7 +362,7 @@ void __stdcall Graphic_Object(int nargs, c_variable** pargs, c_engine* p_engine,
     pargs[0]->as_string(graphicRef);
     pargs[1]->as_string(objectName);
 
-    // ±×·¡ÇÈ °´Ã¼ ÂüÁ¶¿¡¼­ ¸Ş¸ğ¸® ÁÖ¼Ò ÃßÃâ
+    // ê·¸ë˜í”½ ê°ì²´ ì°¸ì¡°ì—ì„œ ë©”ëª¨ë¦¬ ì£¼ì†Œ ì¶”ì¶œ
     CScriptGraphic* pGraphic = nullptr;
     sscanf_s(graphicRef.get_buffer(), "_GRAPHIC_%p", &pGraphic);
 
@@ -339,12 +371,12 @@ void __stdcall Graphic_Object(int nargs, c_variable** pargs, c_engine* p_engine,
         return;
     }
 
-    // °´Ã¼ °íÀ¯ ID »ı¼º
+    // ê°ì²´ ê³ ìœ  ID ìƒì„±
     CScriptGraphicObject* pObject = pGraphic->GetObject(objectName.get_buffer());
     char buffer[64];
     sprintf_s(buffer, "_OBJECT_%p", pObject);
 
-    // ¹®ÀÚ¿­·Î ¹İÈ¯
+    // ë¬¸ìì—´ë¡œ ë°˜í™˜
     result = buffer;
 }
 
@@ -358,7 +390,7 @@ void __stdcall Object_GetVisible(int nargs, c_variable** pargs, c_engine* p_engi
     c_string objectRef;
     pargs[0]->as_string(objectRef);
 
-    // °´Ã¼ ÂüÁ¶¿¡¼­ ¸Ş¸ğ¸® ÁÖ¼Ò ÃßÃâ
+    // ê°ì²´ ì°¸ì¡°ì—ì„œ ë©”ëª¨ë¦¬ ì£¼ì†Œ ì¶”ì¶œ
     CScriptGraphicObject* pObject = nullptr;
     sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
 
@@ -367,7 +399,7 @@ void __stdcall Object_GetVisible(int nargs, c_variable** pargs, c_engine* p_engi
         return;
     }
 
-    // °´Ã¼ÀÇ °¡½Ã¼º »óÅÂ °¡Á®¿À±â
+    // ê°ì²´ì˜ ê°€ì‹œì„± ìƒíƒœ ê°€ì ¸ì˜¤ê¸°
     pObject->GetVisible(result);
 }
 
@@ -380,7 +412,7 @@ void __stdcall Object_SetVisible(int nargs, c_variable** pargs, c_engine* p_engi
     c_string objectRef;
     pargs[0]->as_string(objectRef);
 
-    // °´Ã¼ ÂüÁ¶¿¡¼­ ¸Ş¸ğ¸® ÁÖ¼Ò ÃßÃâ
+    // ê°ì²´ ì°¸ì¡°ì—ì„œ ë©”ëª¨ë¦¬ ì£¼ì†Œ ì¶”ì¶œ
     CScriptGraphicObject* pObject = nullptr;
     sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
 
@@ -388,103 +420,221 @@ void __stdcall Object_SetVisible(int nargs, c_variable** pargs, c_engine* p_engi
         return;
     }
 
-    // °´Ã¼ÀÇ °¡½Ã¼º ¼³Á¤
+    // ê°ì²´ì˜ ê°€ì‹œì„± ì„¤ì •
     pObject->SetVisible(*pargs[1]);
 }
 
-// ¿ÜºÎ¿¡¼­ È£ÃâÇÒ ¼ö ÀÖ´Â System_SetProperty ÇÔ¼ö ±¸Çö
+void __stdcall Object_GetAddString(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
+{
+    if (nargs != 1 || pargs[0]->vt != VT_BSTR) {
+        result = INT_MIN;
+        return;
+    }
+
+    c_string objectRef;
+    pargs[0]->as_string(objectRef);
+
+    // ê°ì²´ ì°¸ì¡°ì—ì„œ ë©”ëª¨ë¦¬ ì£¼ì†Œ ì¶”ì¶œ
+    CScriptGraphicObject* pObject = nullptr;
+    sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
+
+    if (!pObject) {
+        result = INT_MIN;
+        return;
+    }
+
+    pObject->GetAddString(result);
+}
+
+void __stdcall Object_SetAddString(int nargs, c_variable** pargs, c_engine* p_engine)
+{
+    if (nargs != 2 || pargs[0]->vt != VT_BSTR) {
+        return;
+    }
+
+    c_string objectRef;
+    pargs[0]->as_string(objectRef);
+
+    // ê°ì²´ ì°¸ì¡°ì—ì„œ ë©”ëª¨ë¦¬ ì£¼ì†Œ ì¶”ì¶œ
+    CScriptGraphicObject* pObject = nullptr;
+    sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
+
+    if (!pObject) {
+        return;
+    }
+
+    // AddString ì†ì„± ì„¤ì •
+    pObject->SetAddString(*pargs[1]);
+}
+
+// ì™¸ë¶€ì—ì„œ í˜¸ì¶œí•  ìˆ˜ ìˆëŠ” System_SetProperty í•¨ìˆ˜ êµ¬í˜„
 bool __cdecl System_SetProperty(const char* path, VARIANT* value)
 {
-    // °æ·Î Çü½Ä È®ÀÎ ¹× ÆÄ½Ì
+    // ê²½ë¡œ í˜•ì‹ í™•ì¸ ë° íŒŒì‹±
     if (!path || !value)
         return false;
 
-    // "$System."À¸·Î ½ÃÀÛÇÏ´ÂÁö È®ÀÎ
+    // "$System."ìœ¼ë¡œ ì‹œì‘í•˜ëŠ”ì§€ í™•ì¸
     if (strncmp(path, "$System.", 8) != 0)
         return false;
 
-    // °æ·Î¸¦ ÆÄ½ÌÇÏ±â À§ÇÑ ÀÓ½Ã ¹öÆÛ
+    // ê²½ë¡œë¥¼ íŒŒì‹±í•˜ê¸° ìœ„í•œ ì„ì‹œ ë²„í¼
     char buffer[1024] = { 0 };
     strcpy_s(buffer, path);
 
-    // "$System." ÀÌÈÄÀÇ ¹®ÀÚ¿­À» ºĞ¼®
-    char* token = buffer + 8;  // "$System." ´ÙÀ½ ºÎºĞºÎÅÍ
+    // "$System." ì´í›„ì˜ ë¬¸ìì—´ì„ ë¶„ì„
+    char* token = buffer + 8;  // "$System." ë‹¤ìŒ ë¶€ë¶„ë¶€í„°
     char* nextToken = NULL;
 
-    // Ã¹ ¹øÂ° ÅäÅ« ºĞ¼® (¿¹: Graphic)
+    // ì²« ë²ˆì§¸ í† í° ë¶„ì„ (ì˜ˆ: Graphic)
     char* component = strtok_s(token, ".()", &nextToken);
     if (!component)
         return false;
 
-    // Graphic Ã³¸®
+    // Graphic ì²˜ë¦¬
     if (_stricmp(component, "Graphic") == 0)
     {
-        // µµ¸é¸í ÃßÃâ
+        // ë„ë©´ëª… ì¶”ì¶œ
         char drawingName[MAX_PATH] = { 0 };
         component = strtok_s(NULL, "\"", &nextToken);
         if (!component)
             return false;
         strcpy_s(drawingName, component);
 
-        // ´ÙÀ½ ºÎºĞ ÃßÃâ (¿¹: Object)
+        // ë‹¤ìŒ ë¶€ë¶„ ì¶”ì¶œ (ì˜ˆ: Object)
         component = strtok_s(NULL, ".()", &nextToken);
         if (!component || _stricmp(component, "Object") != 0)
             return false;
 
-        // °´Ã¼¸í ÃßÃâ
+        // ê°ì²´ëª… ì¶”ì¶œ
         char objectName[MAX_PATH] = { 0 };
         component = strtok_s(NULL, "\"", &nextToken);
         if (!component)
             return false;
         strcpy_s(objectName, component);
 
-        // ¼Ó¼º¸í ÃßÃâ
+        // ì†ì„±ëª… ì¶”ì¶œ
         component = strtok_s(NULL, ".()", &nextToken);
         if (!component)
             return false;
 
-        // Visible ¼Ó¼º Ã³¸®
+        // Visible ì†ì„± ì²˜ë¦¬
         if (_strnicmp(component, "Visible", 7) == 0)
         {
-            // CScriptObjectManager¸¦ ÅëÇØ °´Ã¼ Á¢±Ù
+            // CScriptObjectManagerë¥¼ í†µí•´ ê°ì²´ ì ‘ê·¼
             CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
             if (!pObject)
                 return false;
 
-            // VARIANT¸¦ c_variable·Î º¯È¯
+            // VARIANTë¥¼ c_variableë¡œ ë³€í™˜
             c_variable val;
-            if (value->vt == VT_BOOL)
-                val = (value->boolVal != VARIANT_FALSE);
-            else if (value->vt == VT_I4)
-                val = (value->lVal != 0);
-            else
-                val = 1; // ±âº»°ª
 
-            // °¡½Ã¼º ¼³Á¤
+            switch (value->vt)
+            {
+            case VT_BOOL:
+                // VARIANT_TRUEëŠ” -1, c_variableì˜ booleanì€ -1(true)ì™€ 0(false)
+                val = (value->boolVal == VARIANT_TRUE);
+                break;
+            case VT_I4:
+                // ì •ìˆ˜ ê°’ì€ 0 ë˜ëŠ” 1ë§Œ í—ˆìš©
+                if (value->lVal == 0)
+                    val = false;
+                else if (value->lVal == 1)
+                    val = true;
+                else {
+                    // ì˜¤ë¥˜ ë¡œê¹…
+                    DebugLog("ì˜¤ë¥˜: Visible ì†ì„±ì—ëŠ” 0 ë˜ëŠ” 1ë§Œ í—ˆìš©ë©ë‹ˆë‹¤ (ì…ë ¥ê°’: %d)", value->lVal);
+                    return true;
+                }
+                break;
+            case VT_BSTR:
+            {
+                // ë¬¸ìì—´ì„ booleanìœ¼ë¡œ ë³€í™˜
+                c_string strVal;
+                val.vt = VT_BSTR;
+                val.bstrVal = SysAllocString(value->bstrVal);
+
+                // "true", "false", "1", "0"ë§Œ í—ˆìš©
+                c_string tempStr;
+                val.as_string(tempStr);
+                if (_stricmp(tempStr.get_buffer(), "true") == 0 ||
+                    _stricmp(tempStr.get_buffer(), "1") == 0)
+                    val = true;
+                else if (_stricmp(tempStr.get_buffer(), "false") == 0 ||
+                    _stricmp(tempStr.get_buffer(), "0") == 0)
+                    val = false;
+                else {
+                    // ì˜¤ë¥˜ ë¡œê¹…
+                    DebugLog("ì˜¤ë¥˜: Visible ì†ì„±ì—ëŠ” 'true', 'false', '1', '0'ë§Œ í—ˆìš©ë©ë‹ˆë‹¤ (ì…ë ¥ê°’: %s)",
+                        tempStr.get_buffer());
+
+                    // bstrVal ë©”ëª¨ë¦¬ í•´ì œ
+                    SysFreeString(val.bstrVal);
+                    val.bstrVal = NULL;
+                    return false;
+                }
+
+                // bstrVal ë©”ëª¨ë¦¬ í•´ì œ
+                SysFreeString(val.bstrVal);
+                val.bstrVal = NULL;
+                val.vt = VT_BOOL;
+            }
+            break;
+            default:
+                // ê¸°íƒ€ íƒ€ì…ì€ ì§€ì›í•˜ì§€ ì•ŠìŒ
+                DebugLog("ì˜¤ë¥˜: Visible ì†ì„±ì— ì§€ì›ë˜ì§€ ì•ŠëŠ” íƒ€ì…ì´ ì‚¬ìš©ë¨ (íƒ€ì…: %d)", value->vt);
+                return false;
+            }
+
+            // ê°€ì‹œì„± ì„¤ì •
             return pObject->SetVisible(val);
         }
-        // ´Ù¸¥ ¼Ó¼º Ã³¸® (ÇÊ¿äÇÏ¸é Ãß°¡)
-        // ...
+
+        else if (_strnicmp(component, "AddString", 9) == 0)
+        {
+            CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
+            if (!pObject)
+                return false;
+
+            c_variable val;
+            if (value->vt == VT_BSTR)
+                val = value->bstrVal;
+            else
+            {
+                // ë‹¤ë¥¸ íƒ€ì…ì„ ë¬¸ìì—´ë¡œ ë³€í™˜
+                VARIANT varStr;
+                VariantInit(&varStr);
+                HRESULT hr = VariantChangeType(&varStr, value, 0, VT_BSTR);
+                if (SUCCEEDED(hr))
+                    val = varStr.bstrVal;
+                VariantClear(&varStr);
+            }
+
+            return pObject->SetAddString(val);
+        }
     }
 
     return false;
 }
 
-// ½ºÅ©¸³Æ® ¿£Áø¿¡¼­ È£ÃâÇÏ´Â È®Àå ÇÔ¼ö (4°³ ÆÄ¶ó¹ÌÅÍ ¹öÀü)
+// ìŠ¤í¬ë¦½íŠ¸ ì—”ì§„ì—ì„œ í˜¸ì¶œí•˜ëŠ” í™•ì¥ í•¨ìˆ˜ (4ê°œ íŒŒë¼ë¯¸í„° ë²„ì „)
 void __stdcall System_SetProperty(int nargs, c_variable** pargs, c_engine* p_engine)
 {
-    // ÀÎÀÚ °ËÁõ
+
+    // ì¸ì ê²€ì¦
     if (nargs != 2 || pargs[0]->vt != VT_BSTR)
         return;
 
     c_string path;
     pargs[0]->as_string(path);
 
-    // VARIANT »ı¼º
+    /*
+    // VARIANT ìƒì„±
     VARIANT value;
     VariantInit(&value);
 
     HRESULT hr = S_OK;
+
 
     switch (pargs[1]->vt)
     {
@@ -510,29 +660,60 @@ void __stdcall System_SetProperty(int nargs, c_variable** pargs, c_engine* p_eng
         break;
     }
 
-    // ½ÇÁ¦ ±¸Çö ÇÔ¼ö È£Ãâ
     System_SetProperty(path.get_buffer(), &value);
 
-    // VARIANT Á¤¸®
+
+    // VARIANT ì •ë¦¬
     VariantClear(&value);
+    */
+
+    class VariantGuard {
+    public:
+        VariantGuard() { VariantInit(&var); }
+        ~VariantGuard() { VariantClear(&var); }
+        VARIANT var;
+    } vg;
+
+    switch (pargs[1]->vt)
+    {
+    case VT_I4:
+        vg.var.vt = VT_I4;
+        vg.var.lVal = pargs[1]->lVal;
+        break;
+    case VT_R8:
+        vg.var.vt = VT_R8;
+        vg.var.dblVal = pargs[1]->dblVal;
+        break;
+        // ê¸°íƒ€ íƒ€ì… ì²˜ë¦¬...
+    case VT_BSTR:
+        vg.var.vt = VT_BSTR;
+        vg.var.bstrVal = SysAllocString(pargs[1]->bstrVal);
+        break;
+    default:
+        vg.var.vt = VT_I4;
+        vg.var.lVal = pargs[1]->as_integer();
+        break;
+    }
+
+    System_SetProperty(path.get_buffer(), &vg.var);
 }
 
-// ÀÎÀÚ °ËÁõ ÇÔ¼ö
+// ì¸ì ê²€ì¦ í•¨ìˆ˜
 bool _check_System_SetProperty(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
     if (n != 2)
     {
-        *p_msg = "SetProperty ÇÔ¼ö´Â °æ·Î¿Í °ª 2°³ÀÇ ÀÎÀÚ°¡ ÇÊ¿äÇÕ´Ï´Ù.";
+        *p_msg = "SetProperty í•¨ìˆ˜ëŠ” ê²½ë¡œì™€ ê°’ 2ê°œì˜ ì¸ìê°€ í•„ìš”í•©ë‹ˆë‹¤.";
         return false;
     }
     return true;
 }
 
-// Ã¼Å© ÇÔ¼ö ±¸Çö
+// ì²´í¬ í•¨ìˆ˜ êµ¬í˜„
 bool _check_System_Graphic(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
     if (n != 1) {
-        *p_msg = "Graphic ÇÔ¼ö´Â µµ¸é ÀÌ¸§ ÀÎÀÚ°¡ ÇÊ¿äÇÕ´Ï´Ù.";
+        *p_msg = "Graphic í•¨ìˆ˜ëŠ” ë„ë©´ ì´ë¦„ ì¸ìê°€ í•„ìš”í•©ë‹ˆë‹¤.";
         return false;
     }
     return true;
@@ -541,7 +722,7 @@ bool _check_System_Graphic(int n, VARENUM* p_types, c_string* p_msg, c_engine* p
 bool _check_Graphic_Object(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
     if (n != 2) {
-        *p_msg = "Object ÇÔ¼ö´Â ±×·¡ÇÈ ÂüÁ¶¿Í °´Ã¼ ÀÌ¸§ ÀÎÀÚ°¡ ÇÊ¿äÇÕ´Ï´Ù.";
+        *p_msg = "Object í•¨ìˆ˜ëŠ” ê·¸ë˜í”½ ì°¸ì¡°ì™€ ê°ì²´ ì´ë¦„ ì¸ìê°€ í•„ìš”í•©ë‹ˆë‹¤.";
         return false;
     }
     return true;
@@ -550,7 +731,7 @@ bool _check_Graphic_Object(int n, VARENUM* p_types, c_string* p_msg, c_engine* p
 bool _check_Object_GetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
     if (n != 1) {
-        *p_msg = "GetVisible ÇÔ¼ö´Â °´Ã¼ ÂüÁ¶ ÀÎÀÚ°¡ ÇÊ¿äÇÕ´Ï´Ù.";
+        *p_msg = "GetVisible í•¨ìˆ˜ëŠ” ê°ì²´ ì°¸ì¡° ì¸ìê°€ í•„ìš”í•©ë‹ˆë‹¤.";
         return false;
     }
     return true;
@@ -559,7 +740,25 @@ bool _check_Object_GetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine
 bool _check_Object_SetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
     if (n != 2) {
-        *p_msg = "SetVisible ÇÔ¼ö´Â °´Ã¼ ÂüÁ¶¿Í °ª ÀÎÀÚ°¡ ÇÊ¿äÇÕ´Ï´Ù.";
+        *p_msg = "SetVisible í•¨ìˆ˜ëŠ” ê°ì²´ ì°¸ì¡°ì™€ ê°’ ì¸ìê°€ í•„ìš”í•©ë‹ˆë‹¤.";
+        return false;
+    }
+    return true;
+}
+
+bool _check_Object_GetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 1) {
+        *p_msg = "GetAddString í•¨ìˆ˜ëŠ” ê°ì²´ ì°¸ì¡° ì¸ìê°€ í•„ìš”í•©ë‹ˆë‹¤.";
+        return false;
+    }
+    return true;
+}
+
+bool _check_Object_SetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 2) {
+        *p_msg = "SetAddString í•¨ìˆ˜ëŠ” ê°ì²´ ì°¸ì¡°ì™€ ê°’ ì¸ìê°€ í•„ìš”í•©ë‹ˆë‹¤.";
         return false;
     }
     return true;

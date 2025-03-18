@@ -4,6 +4,8 @@
 #include "c_assign_atom.h"
 #include "c_engine.h"
 
+extern bool __stdcall System_SetProperty(const char* path, VARIANT* value);
+
 c_assign_atom::c_assign_atom(c_atom_table* ptable,
 							 c_call_stack* p_call_stack,
 							 c_engine* p_engine,
@@ -50,24 +52,21 @@ void c_assign_atom::exec_()
 	// System 객체 처리 추가
 	if (m_is_system_object)
 	{
-		// 시스템 객체 경로 구성 (파라미터 표현식 평가)
-		c_string final_path = m_system_path;
-
-		// 경로의 파라미터들을 실제 값으로 치환
-		// c_string에서 필요한 함수가 없으므로 단순화된 접근법 사용
-
 		// 표현식 평가
 		m_pexpression->exec(&exec);
 
-		// System_SetProperty 함수 호출 (ScriptSystem.cpp에 정의됨)
-		extern bool __stdcall System_SetProperty(const char* path, VARIANT * value);
+		DebugLog("시스템 객체 할당: %s (타입=%d)", m_system_path.get_buffer(), exec.vt);
 
+		// VARIANT로 변환
 		VARIANT value;
 		VariantInit(&value);
 
-		// c_variable을 VARIANT로 변환
 		switch (exec.vt)
 		{
+		case VT_BOOL:
+			value.vt = VT_BOOL;
+			value.boolVal = exec.boolVal ? VARIANT_TRUE : VARIANT_FALSE;
+			break;
 		case VT_I4:
 			value.vt = VT_I4;
 			value.lVal = exec.lVal;
@@ -76,38 +75,31 @@ void c_assign_atom::exec_()
 			value.vt = VT_R8;
 			value.dblVal = exec.dblVal;
 			break;
-		case VT_BOOL:
-			value.vt = VT_BOOL;
-			value.boolVal = exec.boolVal;
-			break;
 		case VT_BSTR:
 			value.vt = VT_BSTR;
 			value.bstrVal = SysAllocString(exec.bstrVal);
 			break;
 		default:
+			// 정수형으로 변환 시도
 			value.vt = VT_I4;
 			value.lVal = exec.as_integer();
 			break;
 		}
 
-		// 경로에서 파라미터 처리를 위한 간단한 방법
-		// 실제 구현에서는 필요에 따라 경로 처리 로직을 작성하세요
-
 		// 속성 설정 함수 호출
-		bool result = System_SetProperty(final_path.get_buffer(), &value);
+		bool result = System_SetProperty(m_system_path.get_buffer(), &value);
 
 		// VARIANT 정리
 		VariantClear(&value);
 
 		if (!result)
 		{
-			m_pengine->runtime_error(m_nline, "failed to set property for System object path: %s", final_path.get_buffer());
+			m_pengine->runtime_error(m_nline, "시스템 객체 속성 설정 실패: %s", m_system_path.get_buffer());
 		}
 
 		m_ptable->set_cur_atom(m_pnext);
 		return;
 	}
-
 
 	switch (_type)
 	{

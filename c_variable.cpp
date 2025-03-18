@@ -1622,7 +1622,7 @@ void c_variable::assert_valid()
 			base_type == VT_BSTR ||
 			base_type == VT_DISPATCH ||
 			base_type == VT_DATE ||
-			base_type == VT_ERROR || 
+			base_type == VT_ERROR ||
 			base_type == VT_NULL);
 
 	_ASSERT(ext_type == 0 ||

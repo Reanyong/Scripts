@@ -39,10 +39,10 @@ public:
 #endif
 
 private:
-	c_string m_system_path;            // System 객체 경로
-	bool m_is_system_object;           // System 객체 여부 플래그
-	bool m_is_get_property;            // 속성 값 가져오기 여부
-	c_ptr_array<c_expression> m_expr_params;  // 경로 파라미터 표현식들 (도면명, 객체명 등)
+	c_string m_system_path;						// System 객체 경로
+	bool m_is_system_object = false;		    // System 객체 여부 플래그
+	bool m_is_get_property;					    // 속성 값 가져오기 여부
+	c_ptr_array<c_expression> m_expr_params;    // 경로 파라미터 표현식들 (도면명, 객체명 등)
 
 public:
 	void set_system_path(const char* path) { m_system_path = path; }
