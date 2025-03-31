@@ -284,8 +284,9 @@ void c_engine::add_standard_extension_functions()
 	VERIFY(add_extension_function("Object.Visible",(PEXTENSION_FUNCTION_FUNCTION)Object_GetVisible,_check_Object_GetVisible));
 	//VERIFY(add_extension_sub("Object.Visible", (PEXTENSION_SUB_FUNCTION)Object_SetVisible, _check_Object_SetVisible));
 
-	VERIFY(add_extension_function("Object.AddString", (PEXTENSION_FUNCTION_FUNCTION)Object_GetAddString, _check_Object_GetAddString));
+	VERIFY(add_extension_function("Object.AddString", (PEXTENSION_FUNCTION_FUNCTION)Object_SetAddString, _check_Object_SetAddString));
 	//VERIFY(add_extension_sub("Object.AddString", (PEXTENSION_SUB_FUNCTION)Object_SetAddString, _check_Object_SetAddString));
+
 }
 
 void c_engine::add_standard_extension_subs()
@@ -314,6 +315,8 @@ void c_engine::add_standard_extension_subs()
 	VERIFY(add_extension_sub("Assert",			Assert,			_check_Assert));
 
 	//...
+
+	VERIFY(add_extension_sub("Object.ResetData",	(PEXTENSION_SUB_FUNCTION)Object_ResetData,	_check_Object_ResetData));
 
 	//20210406  canvas  는 어떻게 하냐.
 }

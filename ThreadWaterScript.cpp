@@ -154,7 +154,7 @@ int CThreadWaterScript::CompileScript(const char* szScriptText, const char* szEr
 	{
 		nRet = 0;
 	}
-	return nRet;
+ 	return nRet;
 }
 
 int CThreadWaterScript::SaveScript(const char* szScriptText)

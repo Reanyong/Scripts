@@ -48,5 +48,8 @@ char g_szLocalModNode[64] = { 0 };
         OutputDebugStringA("\n");
     }
 #else
-    inline void DebugLog(const char* format, ...) {}
+    void DebugLog(const char* format, ...)
+    {
+        // Empty implementation
+    }
 #endif

@@ -49,8 +49,9 @@ public:
     bool SetVisible(c_variable& value);
 
     // 20250312 System-Obejct_AddString
-    bool GetAddString(c_variable& result);
     bool SetAddString(c_variable& value);
+
+    bool ResetData();
 
     // 추가 속성
     bool GetText(c_variable& result);
@@ -106,12 +107,13 @@ bool _check_Object_GetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine
 bool _check_Object_SetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 
 // System-Object-AddString
-void __stdcall Object_GetAddString(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);
 void __stdcall Object_SetAddString(int nargs, c_variable** pargs, c_engine* p_engine);
-bool _check_Object_GetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 bool _check_Object_SetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 
 
+// System-Obejct-Resetdata
+void __stdcall Object_ResetData(int nargs, c_variable** pargs, c_engine* p_engine);
+bool _check_Object_ResetData(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 
 
 
