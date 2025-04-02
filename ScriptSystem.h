@@ -112,7 +112,7 @@ bool _check_Object_SetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engi
 
 
 // System-Obejct-Resetdata
-void __stdcall Object_ResetData(int nargs, c_variable** pargs, c_engine* p_engine);
+void __stdcall Object_ResetData(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);
 bool _check_Object_ResetData(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 
 

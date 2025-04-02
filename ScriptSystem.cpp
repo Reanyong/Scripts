@@ -414,10 +414,11 @@ void __stdcall Object_SetVisible(int nargs, c_variable** pargs, c_engine* p_engi
     pObject->SetVisible(*pargs[1]);
 }
 
-void __stdcall Object_ResetData(int nargs, c_variable** pargs, c_engine* p_engine)
+void __stdcall Object_ResetData(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
 {
     if (nargs != 1 || pargs[0]->vt != VT_BSTR) {
         DebugLog("ResetData 함수 호출 실패: 인자 오류");
+        result = INT_MIN;
         return;
     }
 
@@ -429,10 +430,12 @@ void __stdcall Object_ResetData(int nargs, c_variable** pargs, c_engine* p_engin
 
     if (!pObject) {
         DebugLog("ResetData 함수 호출 실패: 유효하지 않은 객체 참조");
+        result = INT_MIN;
         return;
     }
 
-    pObject->ResetData();
+    bool success = pObject->ResetData();
+    result = success ? 1 : 0;
 }
 
 void __stdcall Object_SetAddString(int nargs, c_variable** pargs, c_engine* p_engine)

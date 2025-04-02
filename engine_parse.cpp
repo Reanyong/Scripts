@@ -3692,6 +3692,8 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 		}
 	}
 
+	bool is_function_call = (strstr(command.get_buffer(), ".Resetdata()") != NULL);
+
 	if (equals_pos >= 0) {
 		is_assignment = true;
 		DebugLog("할당 명령 감지됨");
@@ -3766,6 +3768,31 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 
 		last.push(&p_atom->m_pnext);
 	}
+
+	else if (is_function_call) {
+		// 함수 호출 명령 처리 (예: $System.Graphic("그래픽명").Object("객체명").Resetdata())
+		DebugLog("함수 호출 명령 감지됨: %s", command.get_buffer());
+
+		// c_assign_atom 생성 (함수 호출용)
+		c_assign_atom* p_atom = new c_assign_atom(&m_atom_table, &m_call_stack, this, m_char_stream.cur_line());
+		p_atom->set_system_path(command.get_buffer());
+		p_atom->is_system_object(true);
+		p_atom->set_var_name(command.get_buffer());
+
+		// 함수 호출에 대한 표현식 생성
+		c_expression* p_expr = parse_system_expression("", command.get_buffer());
+		if (p_expr) {
+			p_atom->set_expression(p_expr);
+		}
+
+		m_atom_table.add(p_atom);
+
+		while (c_atom** p_last = last.pop())
+			*p_last = p_atom;
+
+		last.push(&p_atom->m_pnext);
+	}
+
 	else {
 		DebugLog("비할당 명령 감지됨 - 처리 안함");
 		return ERR_;    // 오류 반환
@@ -3787,6 +3814,14 @@ c_expression* c_engine::parse_system_expression(const char* expr_str, const char
 	const char* trimmed_expr = expr_str;
 	while (*trimmed_expr && isspace(*trimmed_expr)) {
 		trimmed_expr++;
+	}
+
+	// 함수 호출인지 확인 (Resetdata()와 같은 형식)
+	if (strstr(prop_path, ".Resetdata()") != NULL) {
+		// Resetdata()는 표현식이 없는 함수 호출
+		p_expr->m_action = c_action::_const;
+		p_expr->m_constant = 1;  // 성공 시 1 반환
+		return p_expr;
 	}
 
 	// 변수 참조 여부 확인
