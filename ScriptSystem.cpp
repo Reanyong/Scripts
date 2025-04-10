@@ -840,6 +840,20 @@ bool __cdecl System_SetProperty(const char* path, VARIANT* value)
 
             return pObject->SetCurSel(val);
         }
+
+        else if (_strnicmp(component, "ResetData", 9) == 0 ||
+            _strnicmp(component, "Resetdata", 9) == 0)  // 대소문자 구분 없이 처리
+        {
+            CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
+            if (!pObject)
+                return false;
+
+            // ResetData 호출을 시도하고 결과 로깅
+            DebugLog("ResetData 함수 호출 시도: %s.%s", drawingName, objectName);
+            bool result = pObject->ResetData();
+            DebugLog("ResetData 함수 호출 결과: %s", result ? "성공" : "실패");
+            return result;
+        }
     }
 
     return false;

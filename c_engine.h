@@ -83,6 +83,20 @@ struct bar_array
 	}
 };
 
+// ㅡㅡERROR STRUCTUREㅡㅡ
+
+struct ErrorInfo {
+	int nLine;                  // 오류 발생 라인
+	c_string message;           // 오류 메시지
+	c_string routineName;       // 오류가 발생한 루틴 이름 (있는 경우)
+	bool bWarning;              // 경고 여부 (true: 경고, false: 오류)
+
+	ErrorInfo() : nLine(-1), bWarning(false) {}
+
+	ErrorInfo(int line, const char* msg, const char* routine = NULL, bool warning = false)
+		: nLine(line), message(msg), routineName(routine ? routine : ""), bWarning(warning) {}
+};
+
 //-----------------------------------------------------------------------------
 
 class c_engine
@@ -420,6 +434,29 @@ public:
 private:
 	bool m_bruntime; // should we process runtime errors?
 	const char* get_VB_error(int n_code);
+
+	// JMH - Error Structure
+	c_array<ErrorInfo> m_errors;        // 수집된 오류 목록
+	bool m_bContinueOnError;            // 오류 발생 시 계속 진행 여부
+
+public:
+    // 오류 수집 관련 함수들
+    void SetContinueOnError(bool bContinue) { m_bContinueOnError = bContinue; }
+    bool GetContinueOnError() const { return m_bContinueOnError; }
+
+    // 오류 추가
+    void AddError(int nLine, const char* format, ...);
+    void AddWarning(int nLine, const char* format, ...);
+
+    // 수집된 오류/경고 개수 반환
+    int GetErrorCount() const;
+    int GetWarningCount() const;
+
+    // 수집된 모든 오류/경고 출력
+    void PrintAllErrors(bool bToDebugger = true);
+
+    // 모든 오류 지우기
+    void ClearAllErrors() { m_errors.reset(); }
 
 public:
 	void error(int n_line, const char *format, ...);
