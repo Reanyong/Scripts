@@ -284,8 +284,14 @@ void c_engine::add_standard_extension_functions()
 	VERIFY(add_extension_function("Object.Visible",(PEXTENSION_FUNCTION_FUNCTION)Object_GetVisible,_check_Object_GetVisible));
 	//VERIFY(add_extension_sub("Object.Visible", (PEXTENSION_SUB_FUNCTION)Object_SetVisible, _check_Object_SetVisible));
 
-	VERIFY(add_extension_function("Object.AddString", (PEXTENSION_FUNCTION_FUNCTION)Object_GetAddString, _check_Object_GetAddString));
+	VERIFY(add_extension_function("Object.AddString", (PEXTENSION_FUNCTION_FUNCTION)Object_SetAddString, _check_Object_SetAddString));
 	//VERIFY(add_extension_sub("Object.AddString", (PEXTENSION_SUB_FUNCTION)Object_SetAddString, _check_Object_SetAddString));
+
+	VERIFY(add_extension_function("Object.ResetData", (PEXTENSION_FUNCTION_FUNCTION)Object_ResetData, _check_Object_ResetData));
+
+	VERIFY(add_extension_function("Object.SetCurStr", (PEXTENSION_FUNCTION_FUNCTION)Object_SetCurStr, _check_Object_SetCurStr));
+	VERIFY(add_extension_function("Object.SetCurSel", (PEXTENSION_FUNCTION_FUNCTION)Object_SetCurSel, _check_Object_SetCurSel));
+
 }
 
 void c_engine::add_standard_extension_subs()

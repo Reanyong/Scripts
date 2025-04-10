@@ -49,52 +49,86 @@ void c_assign_atom::exec_()
 	_ASSERT(this != m_pnext);			// infinite spin
 	c_variable exec;
 
-	// System 객체 처리 추가
 	if (m_is_system_object)
 	{
 		// 표현식 평가
 		m_pexpression->exec(&exec);
 
-		DebugLog("시스템 객체 할당: %s (타입=%d)", m_system_path.get_buffer(), exec.vt);
+		/*
+		DebugLog("시스템 객체 속성 설정: %s (타입=%d, 값=%d)",
+			m_system_path.get_buffer(),
+			exec.vt,
+			exec.vt == VT_BOOL ? exec.boolVal :
+			exec.vt == VT_I4 ? exec.lVal : 0);
+		*/
 
-		// VARIANT로 변환
 		VARIANT value;
 		VariantInit(&value);
 
-		switch (exec.vt)
-		{
-		case VT_BOOL:
+		if (strstr(m_system_path.get_buffer(), ".Visible") != NULL) {
+			// 모든 타입을 boolean으로 변환
 			value.vt = VT_BOOL;
-			value.boolVal = exec.boolVal ? VARIANT_TRUE : VARIANT_FALSE;
+
+			switch (exec.vt) {
+			case VT_BOOL:
+				value.boolVal = exec.boolVal ? VARIANT_TRUE : VARIANT_FALSE;
+				break;
+			case VT_I4:
+				value.boolVal = (exec.lVal != 0) ? VARIANT_TRUE : VARIANT_FALSE;
+				break;
+			case VT_BSTR:
+				// 문자열의 경우 "true", "1" 등의 값을 확인
+			{
+				c_string str_val;
+				exec.as_string(str_val);
+				if (_stricmp(str_val.get_buffer(), "true") == 0 ||
+					_stricmp(str_val.get_buffer(), "1") == 0)
+					value.boolVal = VARIANT_TRUE;
+				else
+					value.boolVal = VARIANT_FALSE;
+			}
 			break;
-		case VT_I4:
-			value.vt = VT_I4;
-			value.lVal = exec.lVal;
-			break;
-		case VT_R8:
-			value.vt = VT_R8;
-			value.dblVal = exec.dblVal;
-			break;
-		case VT_BSTR:
-			value.vt = VT_BSTR;
-			value.bstrVal = SysAllocString(exec.bstrVal);
-			break;
-		default:
-			// 정수형으로 변환 시도
-			value.vt = VT_I4;
-			value.lVal = exec.as_integer();
-			break;
+			default:
+				// 다른 타입은 as_integer를 통해 변환
+				value.boolVal = (exec.as_integer() != 0) ? VARIANT_TRUE : VARIANT_FALSE;
+				break;
+			}
+		}
+		else {
+			// 다른 속성의 경우 원래 타입 유지
+			switch (exec.vt) {
+			case VT_BOOL:
+				value.vt = VT_BOOL;
+				value.boolVal = exec.boolVal ? VARIANT_TRUE : VARIANT_FALSE;
+				break;
+			case VT_I4:
+				value.vt = VT_I4;
+				value.lVal = exec.lVal;
+				break;
+			case VT_BSTR:
+				value.vt = VT_BSTR;
+				value.bstrVal = SysAllocString(exec.bstrVal);
+				break;
+			default:
+				// 기본적으로 정수로 변환
+				value.vt = VT_I4;
+				value.lVal = exec.as_integer();
+				break;
+			}
 		}
 
 		// 속성 설정 함수 호출
 		bool result = System_SetProperty(m_system_path.get_buffer(), &value);
 
-		// VARIANT 정리
-		VariantClear(&value);
-
 		if (!result)
 		{
 			m_pengine->runtime_error(m_nline, "시스템 객체 속성 설정 실패: %s", m_system_path.get_buffer());
+		}
+
+		// bstrVal 메모리 해제를 추가
+		if (value.vt == VT_BSTR && value.bstrVal)
+		{
+			SysFreeString(value.bstrVal);
 		}
 
 		m_ptable->set_cur_atom(m_pnext);

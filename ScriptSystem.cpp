@@ -208,34 +208,6 @@ bool CScriptGraphicObject::SetVisible(c_variable& value)
     return KWSendMsgToViewer(cds);
 }
 
-bool CScriptGraphicObject::GetAddString(c_variable& result)
-{
-    ST_GLOBAL global;
-    ZeroMemory(&global, sizeof(ST_GLOBAL));
-    global.nMode = GM_GV_Get_OBJADDSTRING;
-
-    strcpy_s(global.szParms1, m_graphicName.get_buffer());
-    strcpy_s(global.szParms2, m_objectName.get_buffer());
-
-    COPYDATASTRUCT cds;
-    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
-    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
-    cds.cbData = sizeof(ST_GLOBAL);
-    cds.lpData = &global;
-
-    char buf[1024] = { 0 };
-    int nRet = GetReturnVal(3000, global, buf);
-
-    result.vt = VT_BSTR;
-    CString sValue = "";
-
-    if (nRet == 1)
-        sValue = buf;
-
-    result.bstrVal = sValue.AllocSysString();
-    return (nRet == 1);
-}
-
 bool CScriptGraphicObject::SetAddString(c_variable& value)
 {
     ST_GLOBAL global;
@@ -299,6 +271,68 @@ bool CScriptGraphicObject::SetText(c_variable& value)
     strcpy_s(global.szParms1, m_graphicName.get_buffer());
     strcpy_s(global.szParms2, m_objectName.get_buffer());
     strcpy_s(global.szParms3, strValue.get_buffer());
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    return KWSendMsgToViewer(cds);
+}
+
+bool CScriptGraphicObject::ResetData()
+{
+    ST_GLOBAL global;
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_OBJRESETDATA;
+
+    strcpy_s(global.szParms1, m_graphicName.get_buffer());
+    strcpy_s(global.szParms2, m_objectName.get_buffer());
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    return KWSendMsgToViewer(cds);
+}
+
+bool CScriptGraphicObject::SetCurStr(c_variable& value)
+{
+    ST_GLOBAL global;
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_OBJTEXT;
+
+    c_string strValue;
+    value.as_string(strValue);
+
+    strcpy_s(global.szParms1, m_graphicName.get_buffer());
+    strcpy_s(global.szParms2, m_objectName.get_buffer());
+    strcpy_s(global.szParms3, strValue.get_buffer());
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    return KWSendMsgToViewer(cds);
+}
+
+bool CScriptGraphicObject::SetCurSel(c_variable& value)
+{
+    ST_GLOBAL global;
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_OBJCURSEL;
+
+    char szIndex[32] = { 0 };
+    sprintf_s(szIndex, "%d", value.as_integer());
+
+    strcpy_s(global.szParms1, m_graphicName.get_buffer());
+    strcpy_s(global.szParms2, m_objectName.get_buffer());
+    strcpy_s(global.szParms3, szIndex);
 
     COPYDATASTRUCT cds;
     ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
@@ -424,9 +458,10 @@ void __stdcall Object_SetVisible(int nargs, c_variable** pargs, c_engine* p_engi
     pObject->SetVisible(*pargs[1]);
 }
 
-void __stdcall Object_GetAddString(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
+void __stdcall Object_ResetData(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
 {
     if (nargs != 1 || pargs[0]->vt != VT_BSTR) {
+        DebugLog("ResetData 함수 호출 실패: 인자 오류");
         result = INT_MIN;
         return;
     }
@@ -434,16 +469,17 @@ void __stdcall Object_GetAddString(int nargs, c_variable** pargs, c_engine* p_en
     c_string objectRef;
     pargs[0]->as_string(objectRef);
 
-    // 객체 참조에서 메모리 주소 추출
     CScriptGraphicObject* pObject = nullptr;
     sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
 
     if (!pObject) {
+        DebugLog("ResetData 함수 호출 실패: 유효하지 않은 객체 참조");
         result = INT_MIN;
         return;
     }
 
-    pObject->GetAddString(result);
+    bool success = pObject->ResetData();
+    result = success ? 1 : 0;
 }
 
 void __stdcall Object_SetAddString(int nargs, c_variable** pargs, c_engine* p_engine)
@@ -466,6 +502,49 @@ void __stdcall Object_SetAddString(int nargs, c_variable** pargs, c_engine* p_en
     // AddString 속성 설정
     pObject->SetAddString(*pargs[1]);
 }
+
+void __stdcall Object_SetCurStr(int nargs, c_variable** pargs, c_engine* p_engine)
+{
+    if (nargs != 2 || pargs[0]->vt != VT_BSTR) {
+        return;
+    }
+
+    c_string objectRef;
+    pargs[0]->as_string(objectRef);
+
+    // 객체 참조에서 메모리 주소 추출
+    CScriptGraphicObject* pObject = nullptr;
+    sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
+
+    if (!pObject) {
+        return;
+    }
+
+    // 객체의 SetCurStr 메서드 호출
+    pObject->SetCurStr(*pargs[1]);
+}
+
+void __stdcall Object_SetCurSel(int nargs, c_variable** pargs, c_engine* p_engine)
+{
+    if (nargs != 2 || pargs[0]->vt != VT_BSTR) {
+        return;
+    }
+
+    c_string objectRef;
+    pargs[0]->as_string(objectRef);
+
+    // 객체 참조에서 메모리 주소 추출
+    CScriptGraphicObject* pObject = nullptr;
+    sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
+
+    if (!pObject) {
+        return;
+    }
+
+    // 객체의 SetCurSel 메서드 호출
+    pObject->SetCurSel(*pargs[1]);
+}
+
 
 // 외부에서 호출할 수 있는 System_SetProperty 함수 구현
 bool __cdecl System_SetProperty(const char* path, VARIANT* value)
@@ -597,20 +676,169 @@ bool __cdecl System_SetProperty(const char* path, VARIANT* value)
                 return false;
 
             c_variable val;
+
+            // 문자열 직접 처리
             if (value->vt == VT_BSTR)
-                val = value->bstrVal;
+            {
+                LPOLESTR bstr = value->bstrVal;
+                int len = SysStringLen(bstr);
+
+                if (len >= 2 && bstr[0] == L'"' && bstr[len - 1] == L'"') {
+                    // 따옴표 제거
+                    val.vt = VT_BSTR;
+                    val.bstrVal = SysAllocStringLen(bstr + 1, len - 2);
+                }
+                else {
+                    // 따옴표 없음, 그대로 사용
+                    val.vt = VT_BSTR;
+                    val.bstrVal = SysAllocString(bstr);
+                }
+            }
+            else if (value->vt == VT_R8)
+            {
+                // double을 안전하게 문자열로 변환
+                char buffer[64] = { 0 };
+
+                // NaN이나 비정상 값 확인
+                if (!_finite(value->dblVal) || _isnan(value->dblVal)) {
+                    strcpy_s(buffer, "0");
+                }
+                else {
+                    // 일반적인 숫자 형식으로 변환
+                    sprintf_s(buffer, "%.6f", value->dblVal);
+                }
+
+                // 문자열로 저장
+                val.vt = VT_BSTR;
+                USES_CONVERSION;
+                val.bstrVal = SysAllocString(A2W(buffer));
+            }
             else
             {
-                // 다른 타입을 문자열로 변환
-                VARIANT varStr;
-                VariantInit(&varStr);
-                HRESULT hr = VariantChangeType(&varStr, value, 0, VT_BSTR);
-                if (SUCCEEDED(hr))
-                    val = varStr.bstrVal;
-                VariantClear(&varStr);
+                // 다른 타입은 먼저 특수 처리 시도
+                char buffer[64] = { 0 };
+                switch (value->vt)
+                {
+                case VT_I4:
+                    sprintf_s(buffer, "%d", value->lVal);
+                    break;
+                case VT_BOOL:
+                    strcpy_s(buffer, value->boolVal ? "True" : "False");
+                    break;
+                default:
+                    // 기타 타입은 변환 라이브러리 사용
+                    VARIANT varStr;
+                    VariantInit(&varStr);
+                    HRESULT hr = VariantChangeType(&varStr, value, 0, VT_BSTR);
+                    if (SUCCEEDED(hr))
+                    {
+                        val.vt = VT_BSTR;
+                        val.bstrVal = SysAllocString(varStr.bstrVal);
+                        VariantClear(&varStr);
+                        return pObject->SetAddString(val);
+                    }
+                    else
+                    {
+                        // 변환 실패 시 기본값
+                        strcpy_s(buffer, "");
+                    }
+                }
+
+                // 문자열로 저장
+                val.vt = VT_BSTR;
+                USES_CONVERSION;
+                val.bstrVal = SysAllocString(A2W(buffer));
             }
 
-            return pObject->SetAddString(val);
+            // 공통 코드: AddString 설정 후 값 정리
+            bool result = pObject->SetAddString(val);
+            if (val.vt == VT_BSTR && val.bstrVal)
+            {
+                SysFreeString(val.bstrVal);
+                val.bstrVal = NULL;
+            }
+
+            return result;
+        }
+
+        else if (_strnicmp(component, "SetCurStr", 9) == 0)
+        {
+            CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
+            if (!pObject)
+                return false;
+
+            c_variable val;
+
+            // 문자열 직접 처리
+            if (value->vt == VT_BSTR)
+            {
+                val.vt = VT_BSTR;
+                val.bstrVal = SysAllocString(value->bstrVal);
+            }
+            else
+            {
+                // 다른 타입은 문자열로 변환
+                char buffer[64] = { 0 };
+                switch (value->vt)
+                {
+                case VT_I4:
+                    sprintf_s(buffer, "%d", value->lVal);
+                    break;
+                case VT_BOOL:
+                    strcpy_s(buffer, value->boolVal ? "True" : "False");
+                    break;
+                    // 기타 타입 처리...
+                default:
+                    strcpy_s(buffer, "");
+                }
+
+                val.vt = VT_BSTR;
+                USES_CONVERSION;
+                val.bstrVal = SysAllocString(A2W(buffer));
+            }
+
+            bool result = pObject->SetCurStr(val);
+            if (val.vt == VT_BSTR && val.bstrVal)
+            {
+                SysFreeString(val.bstrVal);
+            }
+
+            return result;
+        }
+        else if (_strnicmp(component, "SetCurSel", 9) == 0)
+        {
+            CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
+            if (!pObject)
+                return false;
+
+            c_variable val;
+
+            switch (value->vt)
+            {
+            case VT_I4:
+                val = value->lVal;
+                break;
+            case VT_BSTR:
+                // 문자열을 정수로 변환 시도
+            {
+                char* endptr;
+                USES_CONVERSION;
+                char* str = W2A(value->bstrVal);
+                long lval = strtol(str, &endptr, 10);
+                if (*endptr == '\0') // 변환 성공
+                    val = lval;
+                else {
+                    DebugLog("오류: SetCurSel 속성에는 숫자만 허용됩니다 (입력값: '%s')", str);
+                    return false;
+                }
+            }
+            break;
+            default:
+                DebugLog("오류: SetCurSel 속성에 지원되지 않는 타입이 사용됨 (타입: %d)", value->vt);
+                return false;
+            }
+
+            return pObject->SetCurSel(val);
         }
     }
 
@@ -746,19 +974,37 @@ bool _check_Object_SetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine
     return true;
 }
 
-bool _check_Object_GetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+bool _check_Object_SetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
-    if (n != 1) {
-        *p_msg = "GetAddString 함수는 객체 참조 인자가 필요합니다.";
+    if (n != 2) {
+        *p_msg = "SetAddString 함수는 객체 참조와 값 인자가 필요합니다.";
         return false;
     }
     return true;
 }
 
-bool _check_Object_SetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+bool _check_Object_ResetData(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 1) {
+        *p_msg = "ResetData 함수는 객체 참조 인자가 필요합니다.";
+        return false;
+    }
+    return true;
+}
+
+bool _check_Object_SetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
     if (n != 2) {
-        *p_msg = "SetAddString 함수는 객체 참조와 값 인자가 필요합니다.";
+        *p_msg = "SetCurStr 함수는 객체 참조와 문자열 인자가 필요합니다.";
+        return false;
+    }
+    return true;
+}
+
+bool _check_Object_SetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 2) {
+        *p_msg = "SetCurSel 함수는 객체 참조와 인덱스 인자가 필요합니다.";
         return false;
     }
     return true;

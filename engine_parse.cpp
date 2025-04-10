@@ -3684,7 +3684,6 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 	c_string left_side;
 	c_string right_side;
 
-	// = 찾기
 	int equals_pos = -1;
 	for (int i = 0; i < command.get_length(); i++) {
 		if (command.get_buffer()[i] == '=') {
@@ -3692,6 +3691,8 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 			break;
 		}
 	}
+
+	bool is_function_call = (strstr(command.get_buffer(), ".Resetdata()") != NULL);
 
 	if (equals_pos >= 0) {
 		is_assignment = true;
@@ -3724,7 +3725,6 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 			p_atom->set_expression(p_expr);
 		}
 
-		// VARIANT 생성 및 System_SetProperty 함수 호출
 		class VariantGuard {
 		public:
 			VariantGuard() { VariantInit(&var); }
@@ -3734,22 +3734,28 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 
 		//System_SetProperty(left_side.get_buffer(), &vg.var);
 
-		switch (p_expr->m_constant.vt)
+		//p_expr->m_constant.vt = VT_BOOL;
+
+		c_variable expr_value;
+		p_expr->exec(&expr_value);
+
+		// 이제 실제 값을 사용
+		switch (expr_value.vt)
 		{
 		case VT_BOOL:
 			vg.var.vt = VT_BOOL;
-			vg.var.boolVal = p_expr->m_constant.boolVal;
+			vg.var.boolVal = expr_value.boolVal ? VARIANT_TRUE : VARIANT_FALSE;
 			break;
 		case VT_I4:
 			vg.var.vt = VT_I4;
-			vg.var.lVal = p_expr->m_constant.lVal;
+			vg.var.lVal = expr_value.lVal;
 			break;
 		case VT_BSTR:
 			vg.var.vt = VT_BSTR;
-			vg.var.bstrVal = SysAllocString(p_expr->m_constant.bstrVal);
+			vg.var.bstrVal = SysAllocString(expr_value.bstrVal);
 			break;
 		default:
-			DebugLog("오류: 지원되지 않는 표현식 타입 (타입: %d)", p_expr->m_constant.vt);
+			DebugLog("오류: 지원되지 않는 표현식 타입 (타입: %d)", expr_value.vt);
 			error(m_char_stream.cur_line(), "지원되지 않는 속성 값 타입이 사용되었습니다");
 			delete p_atom;
 			return ERR_;
@@ -3762,6 +3768,31 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 
 		last.push(&p_atom->m_pnext);
 	}
+
+	else if (is_function_call) {
+		// 함수 호출 명령 처리 (예: $System.Graphic("그래픽명").Object("객체명").Resetdata())
+		DebugLog("함수 호출 명령 감지됨: %s", command.get_buffer());
+
+		// c_assign_atom 생성 (함수 호출용)
+		c_assign_atom* p_atom = new c_assign_atom(&m_atom_table, &m_call_stack, this, m_char_stream.cur_line());
+		p_atom->set_system_path(command.get_buffer());
+		p_atom->is_system_object(true);
+		p_atom->set_var_name(command.get_buffer());
+
+		// 함수 호출에 대한 표현식 생성
+		c_expression* p_expr = parse_system_expression("", command.get_buffer());
+		if (p_expr) {
+			p_atom->set_expression(p_expr);
+		}
+
+		m_atom_table.add(p_atom);
+
+		while (c_atom** p_last = last.pop())
+			*p_last = p_atom;
+
+		last.push(&p_atom->m_pnext);
+	}
+
 	else {
 		DebugLog("비할당 명령 감지됨 - 처리 안함");
 		return ERR_;    // 오류 반환
@@ -3785,6 +3816,14 @@ c_expression* c_engine::parse_system_expression(const char* expr_str, const char
 		trimmed_expr++;
 	}
 
+	// 함수 호출인지 확인 (Resetdata()와 같은 형식)
+	if (strstr(prop_path, ".Resetdata()") != NULL) {
+		// Resetdata()는 표현식이 없는 함수 호출
+		p_expr->m_action = c_action::_const;
+		p_expr->m_constant = 1;  // 성공 시 1 반환
+		return p_expr;
+	}
+
 	// 변수 참조 여부 확인
 	bool is_variable = false;
 	if (isalpha(trimmed_expr[0]) || trimmed_expr[0] == '_' || trimmed_expr[0] == '@') {
@@ -3804,13 +3843,28 @@ c_expression* c_engine::parse_system_expression(const char* expr_str, const char
 	if (is_variable) {
 		p_expr->m_action = c_action::_variable;
 		p_expr->set_var_name(trimmed_expr);
+		return p_expr;
+	}
 
-		if (strstr(prop_path, ".Visible") != NULL) {
-			// 변수 참조 가능 여부 확인
-			c_variable* p_var = nullptr;
+	if (trimmed_expr[0] == '"')
+	{
+		size_t len = strlen(trimmed_expr);
+
+		if(len > 2 && trimmed_expr[len - 1] == '"')
+		{
+			char* unquoted = new char[len - 1];
+			strncpy_s(unquoted, len - 1, trimmed_expr + 1, len - 2);
+			unquoted[len - 2] = '\0';
+
+			p_expr->m_action = c_action::_const;
+			p_expr->m_constant = unquoted;
+
+			delete[] unquoted;
+			return p_expr;
 		}
 	}
-	else if (strstr(prop_path, ".Visible") != NULL)
+
+	if (strstr(prop_path, ".Visible") != NULL)
 	{
 		p_expr->m_action = c_action::_const;
 
@@ -3825,10 +3879,69 @@ c_expression* c_engine::parse_system_expression(const char* expr_str, const char
 		else {
 			char* endptr;
 			long value = strtol(trimmed_expr, &endptr, 10);
-
-			error(CUR_ERR_LINE, "Visible 속성에는 'true', 'false', '0', '1'만 허용됩니다 (입력값: '%s')", trimmed_expr);
+			if (endptr != trimmed_expr) {
+				p_expr->m_constant = (value != 0);
+			}
+			else {
+				error(CUR_ERR_LINE, "Visible 속성에는 'true', 'false', '0', '1' 또는 정수 값만 허용됩니다 (입력값: '%s')", trimmed_expr);
+			}
 		}
 	}
+	else if (strstr(prop_path, ".AddString") != NULL)
+	{
+		if (trimmed_expr[0] == '"')
+		{
+			size_t len = strlen(trimmed_expr);
+
+			if (len > 2 && trimmed_expr[len - 1] == '"')
+			{
+				char* unquoted = new char[len - 1];
+				strncpy_s(unquoted, len - 1, trimmed_expr + 1, len - 2);
+				unquoted[len - 2] = '\0';
+
+				p_expr->m_action = c_action::_const;
+				p_expr->m_constant = unquoted;
+
+				delete[] unquoted;
+				return p_expr;
+			}
+		}
+	}
+
+	else if (strstr(prop_path, ".SetCurStr") != NULL)
+	{
+		if (trimmed_expr[0] == '"')
+		{
+			size_t len = strlen(trimmed_expr);
+
+			if (len > 2 && trimmed_expr[len - 1] == '"')
+			{
+				char* unquoted = new char[len - 1];
+				strncpy_s(unquoted, len - 1, trimmed_expr + 1, len - 2);
+				unquoted[len - 2] = '\0';
+
+				p_expr->m_action = c_action::_const;
+				p_expr->m_constant = unquoted;
+
+				delete[] unquoted;
+				return p_expr;
+			}
+		}
+	}
+	else if (strstr(prop_path, ".SetCurSel") != NULL)
+	{
+		char* endptr;
+		long value = strtol(trimmed_expr, &endptr, 10);
+
+		if (endptr != trimmed_expr) {
+			p_expr->m_action = c_action::_const;
+			p_expr->m_constant = value;
+		}
+		else {
+			error(CUR_ERR_LINE, "SetCurSel 속성에는 숫자 값만 허용됩니다 (입력값: '%s')", trimmed_expr);
+		}
+	}
+
 	else
 	{
 		p_expr->m_action = c_action::_const;
