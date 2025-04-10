@@ -299,6 +299,50 @@ bool CScriptGraphicObject::ResetData()
     return KWSendMsgToViewer(cds);
 }
 
+bool CScriptGraphicObject::SetCurStr(c_variable& value)
+{
+    ST_GLOBAL global;
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_OBJTEXT;
+
+    c_string strValue;
+    value.as_string(strValue);
+
+    strcpy_s(global.szParms1, m_graphicName.get_buffer());
+    strcpy_s(global.szParms2, m_objectName.get_buffer());
+    strcpy_s(global.szParms3, strValue.get_buffer());
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    return KWSendMsgToViewer(cds);
+}
+
+bool CScriptGraphicObject::SetCurSel(c_variable& value)
+{
+    ST_GLOBAL global;
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_OBJCURSEL;
+
+    char szIndex[32] = { 0 };
+    sprintf_s(szIndex, "%d", value.as_integer());
+
+    strcpy_s(global.szParms1, m_graphicName.get_buffer());
+    strcpy_s(global.szParms2, m_objectName.get_buffer());
+    strcpy_s(global.szParms3, szIndex);
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    return KWSendMsgToViewer(cds);
+}
+
 // 그래픽 클래스 구현
 CScriptGraphic::CScriptGraphic(const char* name)
     : m_name(name)
@@ -458,6 +502,49 @@ void __stdcall Object_SetAddString(int nargs, c_variable** pargs, c_engine* p_en
     // AddString 속성 설정
     pObject->SetAddString(*pargs[1]);
 }
+
+void __stdcall Object_SetCurStr(int nargs, c_variable** pargs, c_engine* p_engine)
+{
+    if (nargs != 2 || pargs[0]->vt != VT_BSTR) {
+        return;
+    }
+
+    c_string objectRef;
+    pargs[0]->as_string(objectRef);
+
+    // 객체 참조에서 메모리 주소 추출
+    CScriptGraphicObject* pObject = nullptr;
+    sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
+
+    if (!pObject) {
+        return;
+    }
+
+    // 객체의 SetCurStr 메서드 호출
+    pObject->SetCurStr(*pargs[1]);
+}
+
+void __stdcall Object_SetCurSel(int nargs, c_variable** pargs, c_engine* p_engine)
+{
+    if (nargs != 2 || pargs[0]->vt != VT_BSTR) {
+        return;
+    }
+
+    c_string objectRef;
+    pargs[0]->as_string(objectRef);
+
+    // 객체 참조에서 메모리 주소 추출
+    CScriptGraphicObject* pObject = nullptr;
+    sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
+
+    if (!pObject) {
+        return;
+    }
+
+    // 객체의 SetCurSel 메서드 호출
+    pObject->SetCurSel(*pargs[1]);
+}
+
 
 // 외부에서 호출할 수 있는 System_SetProperty 함수 구현
 bool __cdecl System_SetProperty(const char* path, VARIANT* value)
@@ -673,6 +760,86 @@ bool __cdecl System_SetProperty(const char* path, VARIANT* value)
 
             return result;
         }
+
+        else if (_strnicmp(component, "SetCurStr", 9) == 0)
+        {
+            CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
+            if (!pObject)
+                return false;
+
+            c_variable val;
+
+            // 문자열 직접 처리
+            if (value->vt == VT_BSTR)
+            {
+                val.vt = VT_BSTR;
+                val.bstrVal = SysAllocString(value->bstrVal);
+            }
+            else
+            {
+                // 다른 타입은 문자열로 변환
+                char buffer[64] = { 0 };
+                switch (value->vt)
+                {
+                case VT_I4:
+                    sprintf_s(buffer, "%d", value->lVal);
+                    break;
+                case VT_BOOL:
+                    strcpy_s(buffer, value->boolVal ? "True" : "False");
+                    break;
+                    // 기타 타입 처리...
+                default:
+                    strcpy_s(buffer, "");
+                }
+
+                val.vt = VT_BSTR;
+                USES_CONVERSION;
+                val.bstrVal = SysAllocString(A2W(buffer));
+            }
+
+            bool result = pObject->SetCurStr(val);
+            if (val.vt == VT_BSTR && val.bstrVal)
+            {
+                SysFreeString(val.bstrVal);
+            }
+
+            return result;
+        }
+        else if (_strnicmp(component, "SetCurSel", 9) == 0)
+        {
+            CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
+            if (!pObject)
+                return false;
+
+            c_variable val;
+
+            switch (value->vt)
+            {
+            case VT_I4:
+                val = value->lVal;
+                break;
+            case VT_BSTR:
+                // 문자열을 정수로 변환 시도
+            {
+                char* endptr;
+                USES_CONVERSION;
+                char* str = W2A(value->bstrVal);
+                long lval = strtol(str, &endptr, 10);
+                if (*endptr == '\0') // 변환 성공
+                    val = lval;
+                else {
+                    DebugLog("오류: SetCurSel 속성에는 숫자만 허용됩니다 (입력값: '%s')", str);
+                    return false;
+                }
+            }
+            break;
+            default:
+                DebugLog("오류: SetCurSel 속성에 지원되지 않는 타입이 사용됨 (타입: %d)", value->vt);
+                return false;
+            }
+
+            return pObject->SetCurSel(val);
+        }
     }
 
     return false;
@@ -820,6 +987,24 @@ bool _check_Object_ResetData(int n, VARENUM* p_types, c_string* p_msg, c_engine*
 {
     if (n != 1) {
         *p_msg = "ResetData 함수는 객체 참조 인자가 필요합니다.";
+        return false;
+    }
+    return true;
+}
+
+bool _check_Object_SetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 2) {
+        *p_msg = "SetCurStr 함수는 객체 참조와 문자열 인자가 필요합니다.";
+        return false;
+    }
+    return true;
+}
+
+bool _check_Object_SetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 2) {
+        *p_msg = "SetCurSel 함수는 객체 참조와 인덱스 인자가 필요합니다.";
         return false;
     }
     return true;

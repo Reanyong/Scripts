@@ -3906,10 +3906,39 @@ c_expression* c_engine::parse_system_expression(const char* expr_str, const char
 				return p_expr;
 			}
 		}
-		else
+	}
+
+	else if (strstr(prop_path, ".SetCurStr") != NULL)
+	{
+		if (trimmed_expr[0] == '"')
 		{
+			size_t len = strlen(trimmed_expr);
+
+			if (len > 2 && trimmed_expr[len - 1] == '"')
+			{
+				char* unquoted = new char[len - 1];
+				strncpy_s(unquoted, len - 1, trimmed_expr + 1, len - 2);
+				unquoted[len - 2] = '\0';
+
+				p_expr->m_action = c_action::_const;
+				p_expr->m_constant = unquoted;
+
+				delete[] unquoted;
+				return p_expr;
+			}
+		}
+	}
+	else if (strstr(prop_path, ".SetCurSel") != NULL)
+	{
+		char* endptr;
+		long value = strtol(trimmed_expr, &endptr, 10);
+
+		if (endptr != trimmed_expr) {
 			p_expr->m_action = c_action::_const;
-			p_expr->m_constant = trimmed_expr;
+			p_expr->m_constant = value;
+		}
+		else {
+			error(CUR_ERR_LINE, "SetCurSel 속성에는 숫자 값만 허용됩니다 (입력값: '%s')", trimmed_expr);
 		}
 	}
 

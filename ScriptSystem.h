@@ -48,10 +48,15 @@ public:
     bool GetVisible(c_variable& result);
     bool SetVisible(c_variable& value);
 
-    // 20250312 System-Obejct_AddString
+    // 20250312 System_Obejct_AddString
     bool SetAddString(c_variable& value);
 
     bool ResetData();
+
+    // 20250402 Systen_object_SetCurStr
+    // 20250402 Systen_object_SetCurSel
+    bool SetCurStr(c_variable& value);
+    bool SetCurSel(c_variable& value);
 
     // 추가 속성
     bool GetText(c_variable& result);
@@ -110,10 +115,17 @@ bool _check_Object_SetVisible(int n, VARENUM* p_types, c_string* p_msg, c_engine
 void __stdcall Object_SetAddString(int nargs, c_variable** pargs, c_engine* p_engine);
 bool _check_Object_SetAddString(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 
-
 // System-Obejct-Resetdata
 void __stdcall Object_ResetData(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);
 bool _check_Object_ResetData(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
+
+// System-Object-SetCurStr
+void __stdcall Object_SetCurStr(int nargs, c_variable** pargs, c_engine* p_engine);
+bool _check_Object_SetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
+
+// System-Object-SetCurSel
+void __stdcall Object_SetCurSel(int nargs, c_variable** pargs, c_engine* p_engine);
+bool _check_Object_SetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 
 
 

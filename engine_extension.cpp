@@ -289,6 +289,9 @@ void c_engine::add_standard_extension_functions()
 
 	VERIFY(add_extension_function("Object.ResetData", (PEXTENSION_FUNCTION_FUNCTION)Object_ResetData, _check_Object_ResetData));
 
+	VERIFY(add_extension_function("Object.SetCurStr", (PEXTENSION_FUNCTION_FUNCTION)Object_SetCurStr, _check_Object_SetCurStr));
+	VERIFY(add_extension_function("Object.SetCurSel", (PEXTENSION_FUNCTION_FUNCTION)Object_SetCurSel, _check_Object_SetCurSel));
+
 }
 
 void c_engine::add_standard_extension_subs()
