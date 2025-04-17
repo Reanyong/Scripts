@@ -24,6 +24,8 @@ m_com_hint(this)
 	m_nterminal_lines	= MAX_TERMINAL_STRINGS;
 	m_ballow_debugging	= true;
 
+	m_bContinueOnError = true;  // 기본값: 오류 발생해도 계속 진행
+
 	internal_reset();
 
 // extensions -----------------------------------------------------------------
@@ -810,4 +812,142 @@ const char* c_engine::get_error_descr()
 	while (p && isspace(*p)) p++;
 
 	return p;
+}
+
+// 오류 수집 함수 구현
+void c_engine::AddError(int nLine, const char* format, ...)
+{
+	char err[MAX_ERR_LENGTH + 1];
+
+	va_list arglist;
+	va_start(arglist, format);
+	vsprintf_s(err, MAX_ERR_LENGTH, format, arglist);
+	va_end(arglist);
+
+	int n_actual_error_line;
+	switch (nLine)
+	{
+	case CUR_ERR_LINE:
+		n_actual_error_line = m_atom_table.get_cur_line();
+		if (n_actual_error_line == -1)
+			n_actual_error_line = m_char_stream.cur_line();
+		break;
+
+	case NO_ERR_LINE: n_actual_error_line = -1;
+		break;
+
+	default: n_actual_error_line = nLine;
+	}
+
+	// 현재 루틴 이름 가져오기
+	const char* routineName = NULL;
+	if (m_pcur_routine_entry) {
+		routineName = m_pcur_routine_entry->get_var_desc()->get_name();
+	}
+
+	// 오류 정보 추가
+	ErrorInfo info(n_actual_error_line, err, routineName, false);
+	m_errors.add(info);
+
+	// 기존 오류 로그에도 추가
+	error(n_actual_error_line, err);
+}
+
+void c_engine::AddWarning(int nLine, const char* format, ...)
+{
+	// AddError와 유사하게 구현
+	// ...
+}
+
+int c_engine::GetErrorCount() const
+{
+	int count = 0;
+	c_array<ErrorInfo>& errors = const_cast<c_array<ErrorInfo>&>(m_errors);
+	for (int i = 0; i < errors.get_size(); i++) {
+		if (!errors[i].bWarning) count++;
+	}
+	return count;
+}
+
+int c_engine::GetWarningCount() const
+{
+	int count = 0;
+	c_array<ErrorInfo>& errors = const_cast<c_array<ErrorInfo>&>(m_errors);
+	for (int i = 0; i < errors.get_size(); i++) {
+		if (!errors[i].bWarning) count++;
+	}
+	return count;
+}
+
+void c_engine::PrintAllErrors(bool bToDebugger)
+{
+	if (m_errors.get_size() == 0) {
+		if (bToDebugger) dbg_print("컴파일 성공: 오류 없음");
+		return;
+	}
+
+	c_string output = "컴파일 결과:\r\n";
+	char buffer[MAX_ERR_LENGTH + 1];
+
+	sprintf_s(buffer, "오류: %d개, 경고: %d개\r\n", GetErrorCount(), GetWarningCount());
+	output += buffer;
+	output += "--------------------------------------------\r\n";
+
+	for (int i = 0; i < m_errors.get_size(); i++) {
+		const ErrorInfo& info = m_errors[i];
+
+		c_string line;
+
+		if (info.bWarning) {
+			if (info.nLine != -1) {
+				if (info.routineName.get_length() > 0) {
+					sprintf_s(buffer, "[경고] 라인 %d (루틴: %s): %s\r\n",
+						info.nLine,
+						const_cast<c_string&>(info.routineName).get_buffer(),
+						const_cast<c_string&>(info.message).get_buffer());
+				}
+				else {
+					sprintf_s(buffer, "[경고] 라인 %d: %s\r\n",
+						info.nLine,
+						const_cast<c_string&>(info.message).get_buffer());
+				}
+			}
+			else {
+				sprintf_s(buffer, "[경고]: %s\r\n",
+					const_cast<c_string&>(info.message).get_buffer());
+			}
+		}
+		else {
+			if (info.nLine != -1) {
+				if (info.routineName.get_length() > 0) {
+					sprintf_s(buffer, "[오류] 라인 %d (루틴: %s): %s\r\n",
+						info.nLine,
+						const_cast<c_string&>(info.routineName).get_buffer(),
+						const_cast<c_string&>(info.message).get_buffer());
+				}
+				else {
+					sprintf_s(buffer, "[오류] 라인 %d: %s\r\n",
+						info.nLine,
+						const_cast<c_string&>(info.message).get_buffer());
+				}
+			}
+			else {
+				sprintf_s(buffer, "[오류]: %s\r\n",
+					const_cast<c_string&>(info.message).get_buffer());
+			}
+		}
+
+		output += buffer;
+	}
+
+	if (bToDebugger) {
+		dbg_print(output.get_buffer());
+	}
+
+	// 파일에도 저장
+	FILE* f = fopen("CompileResult.log", "w");
+	if (f) {
+		fprintf(f, "%s", output.get_buffer());
+		fclose(f);
+	}
 }

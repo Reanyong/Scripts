@@ -292,6 +292,8 @@ void c_engine::add_standard_extension_functions()
 	VERIFY(add_extension_function("Object.SetCurStr", (PEXTENSION_FUNCTION_FUNCTION)Object_SetCurStr, _check_Object_SetCurStr));
 	VERIFY(add_extension_function("Object.SetCurSel", (PEXTENSION_FUNCTION_FUNCTION)Object_SetCurSel, _check_Object_SetCurSel));
 
+	VERIFY(add_extension_function("Object.GetCurStr", (PEXTENSION_FUNCTION_FUNCTION)Object_GetCurStr, _check_Object_GetCurStr));
+	VERIFY(add_extension_function("Object.GetCurSel", (PEXTENSION_FUNCTION_FUNCTION)Object_GetCurSel, _check_Object_GetCurSel));
 }
 
 void c_engine::add_standard_extension_subs()
@@ -473,6 +475,9 @@ void c_engine::add_standard_hints()
 	VERIFY(add_hint("$System.Graphic", "그래픽 도면 객체에 접근합니다. 사용법: $System.Graphic(\"도면명\")"));
 	VERIFY(add_hint("Graphic.Object", "특정 도면 내 객체에 접근합니다. 사용법: $System.Graphic(\"도면명\").Object(\"객체명\")"));
 	VERIFY(add_hint("Object.Visible", "객체의 가시성을 설정하거나 가져옵니다. 사용법: $System.Graphic(\"도면명\").Object(\"객체명\").Visible = true/false"));
+
+	VERIFY(add_hint("Object.GetCurSel", "현재 선택된 항목의 인덱스를 반환합니다"));
+	VERIFY(add_hint("Object.GetCurStr", "현재 선택된 항목의 문자열을 반환합니다"));
 
 	_ASSERT(m_hint_kwds.get_size() == m_hint_descs.get_size());
 	n_default_hints = m_hint_kwds.get_size();

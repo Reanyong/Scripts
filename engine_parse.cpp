@@ -51,77 +51,100 @@ bool c_engine::variable_declared(const char* p_name)
 
 bool c_engine::parse()
 {
+	ClearAllErrors();
+	bool bResult = true;
 	m_func_expressions.reset();
 	m_func_names.empty();
 	m_line_numbers.reset();
-
 	m_bexplicit = false;
 	m_bexplicit_set = false;
+
+	// 컴파일 중에 오류가 발생해도 계속 진행하도록 설정
+	bool originalContinueValue = m_bContinueOnError;
+	m_bContinueOnError = true;
 
 #ifndef _DEBUG
 	try
 	{
 #endif
-// free sub and global namespace from previous parse --------------------------
-
+		// free sub and global namespace from previous parse --------------------------
 		m_sub_namespace.reset(true);
 		m_global_namespace.reset(true);
-
-// find subs and global variables ---------------------------------------------
-
-		if (!_pre_parse()) return false;
+		// find subs and global variables ---------------------------------------------
+		if (!_pre_parse()) {
+			bResult = false;
+			// 오류가 있더라도 계속 진행
+		}
 		prepare_global_namespace();
-		if (!prepare_dll_routines()) return false;
-
+		if (!prepare_dll_routines()) {
+			bResult = false;
+			// 오류가 있더라도 계속 진행
+		}
 		m_bexplicit_set = false;
-
-// parse routines -------------------------------------------------------------
-
+		// parse routines -------------------------------------------------------------
 		prevtok.reset();
 		curtok.reset();
-
 		bool b_errors = false;
 		for (int i = 0; i < m_sub_table.get_size(); i++)
 		{
 			m_char_stream.pos(m_sub_table.get(i).m_position);
 			m_sub_namespace.reset(false);
-			if (parse_routine(m_sub_table.get(i).b_is_sub) == ERR_) b_errors = true;
+			if (parse_routine(m_sub_table.get(i).b_is_sub) == ERR_) {
+				b_errors = true;
+				// 오류가 있더라도 계속 진행
+			}
 		}
-
-// parse main program ---------------------------------------------------------
-
-		// go to entry pos
+		// parse main program ---------------------------------------------------------
+				// go to entry pos
 		m_pcur_routine_entry = 0;
 		m_char_stream.pos(m_nentry_pos);
 		m_sub_namespace.reset(false);
 		gettok();
-
 		// parse it
 		c_vector_table last;
-		if (_parse(last) == ERR_) b_errors = true;
-
-// post-parse -----------------------------------------------------------------
-
-		if (b_errors) return false;
-		if (!_post_parse()) return false;
-
+		if (_parse(last) == ERR_) {
+			b_errors = true;
+			// 오류가 있더라도 계속 진행
+		}
+		// post-parse -----------------------------------------------------------------
+		if (b_errors) {
+			bResult = false;
+			// 오류가 있더라도 계속 진행
+		}
+		if (!_post_parse()) {
+			bResult = false;
+			// 오류가 있더라도 계속 진행
+		}
 #ifndef _DEBUG
 	}
-	catch(...)
+	catch (...)
 	{
 		error(CUR_ERR_LINE, "runtime exception while parsing source.");
-		return false;
+		bResult = false;
 	}
 #endif
 
-// prepare function callers
-	m_atom_table.prepare_function_callers();
+	// 원래 설정으로 복원
+	m_bContinueOnError = originalContinueValue;
+
+	// prepare function callers
+	if (bResult) {
+		m_atom_table.prepare_function_callers();
+	}
 
 #ifdef _DEBUG
-	m_atom_table.dump();
+	if (bResult) {
+		m_atom_table.dump();
+	}
 #endif
 
-	return true;
+	// 오류 또는 경고가 있으면 결과 출력
+	if (GetErrorCount() > 0 || GetWarningCount() > 0) {
+		PrintAllErrors(true);
+	}
+
+	// 오류가 하나라도 있으면 false 반환
+	return GetErrorCount() == 0 && bResult;
 }
 
 bool c_engine::_pre_parse()
@@ -3051,6 +3074,10 @@ c_expression* c_engine::_primary()
 		}
 		break;
 
+	case token_type::system:
+
+		break;
+
 	case token_type::eos:
 		error(CUR_ERR_LINE, "unexpected end of line in expression.");
 		delete left;
@@ -3692,7 +3719,10 @@ DWORD c_engine::parse_system_command(c_vector_table& last, DWORD stop_at)
 		}
 	}
 
-	bool is_function_call = (strstr(command.get_buffer(), ".Resetdata()") != NULL);
+	bool is_function_call = (strstr(command.get_buffer(), ".ResetData()") != NULL ||
+		strstr(command.get_buffer(), ".Resetdata()") != NULL ||
+		strstr(command.get_buffer(), ".resetdata()") != NULL ||
+		strstr(command.get_buffer(), ".RESETDATA()") != NULL);
 
 	if (equals_pos >= 0) {
 		is_assignment = true;
@@ -3816,8 +3846,11 @@ c_expression* c_engine::parse_system_expression(const char* expr_str, const char
 		trimmed_expr++;
 	}
 
-	// 함수 호출인지 확인 (Resetdata()와 같은 형식)
-	if (strstr(prop_path, ".Resetdata()") != NULL) {
+	// 함수 호출인지 확인 (ResetData()와 같은 형식)
+	if (strstr(prop_path, ".Resetdata()") != NULL ||
+		strstr(prop_path, ".ResetData()") != NULL ||
+		strstr(prop_path, ".resetdata()") != NULL)
+	{
 		// Resetdata()는 표현식이 없는 함수 호출
 		p_expr->m_action = c_action::_const;
 		p_expr->m_constant = 1;  // 성공 시 1 반환
