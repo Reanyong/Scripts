@@ -122,6 +122,14 @@ void CScriptObjectManager::Clear()
     DestroyInstance();
 }
 
+void CScriptObjectManager::DestroyInstance()
+{
+    if (s_instance) {
+        delete s_instance;
+        s_instance = nullptr;
+    }
+}
+
 CScriptGraphic* CScriptObjectManager::GetGraphic(const char* name)
 {
     std::string key = name;
@@ -343,6 +351,62 @@ bool CScriptGraphicObject::SetCurSel(c_variable& value)
     return KWSendMsgToViewer(cds);
 }
 
+bool CScriptGraphicObject::GetCurStr(c_variable& result)
+{
+    // Viewer에 객체의 현재 선택 문자열 요청
+    ST_GLOBAL global;
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_Get_OBJTEXT;
+
+    strcpy_s(global.szParms1, m_graphicName.get_buffer());
+    strcpy_s(global.szParms2, m_objectName.get_buffer());
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    char buf[1024] = { 0 };
+    int nRet = GetReturnVal(3000, global, buf);
+    if (nRet == 1)
+    {
+        result = buf;
+        return true;
+    }
+
+    result = "";
+    return false;
+}
+
+bool CScriptGraphicObject::GetCurSel(c_variable& result)
+{
+    // Viewer에 객체의 현재 선택 인덱스 요청
+    ST_GLOBAL global;
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_Get_OBJCURSEL;
+
+    strcpy_s(global.szParms1, m_graphicName.get_buffer());
+    strcpy_s(global.szParms2, m_objectName.get_buffer());
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    char buf[1024] = { 0 };
+    int nRet = GetReturnVal(3000, global, buf);
+    if (nRet == 1)
+    {
+        result = atoi(buf);
+        return true;
+    }
+
+    result = -1;
+    return false;
+}
+
 // 그래픽 클래스 구현
 CScriptGraphic::CScriptGraphic(const char* name)
     : m_name(name)
@@ -545,6 +609,51 @@ void __stdcall Object_SetCurSel(int nargs, c_variable** pargs, c_engine* p_engin
     pObject->SetCurSel(*pargs[1]);
 }
 
+void __stdcall Object_GetCurSel(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
+{
+    if (nargs != 1 || pargs[0]->vt != VT_BSTR) {
+        result = INT_MIN;
+        return;
+    }
+
+    c_string objectRef;
+    pargs[0]->as_string(objectRef);
+
+    // 객체 참조에서 메모리 주소 추출
+    CScriptGraphicObject* pObject = nullptr;
+    sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
+
+    if (!pObject) {
+        result = INT_MIN;
+        return;
+    }
+
+    // 객체의 GetCurSel 메서드 호출
+    pObject->GetCurSel(result);
+}
+
+void __stdcall Object_GetCurStr(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
+{
+    if (nargs != 1 || pargs[0]->vt != VT_BSTR) {
+        result = INT_MIN;
+        return;
+    }
+
+    c_string objectRef;
+    pargs[0]->as_string(objectRef);
+
+    // 객체 참조에서 메모리 주소 추출
+    CScriptGraphicObject* pObject = nullptr;
+    sscanf_s(objectRef.get_buffer(), "_OBJECT_%p", &pObject);
+
+    if (!pObject) {
+        result = INT_MIN;
+        return;
+    }
+
+    // 객체의 GetCurStr 메서드 호출
+    pObject->GetCurStr(result);
+}
 
 // 외부에서 호출할 수 있는 System_SetProperty 함수 구현
 bool __cdecl System_SetProperty(const char* path, VARIANT* value)
@@ -840,24 +949,10 @@ bool __cdecl System_SetProperty(const char* path, VARIANT* value)
 
             return pObject->SetCurSel(val);
         }
-
-        else if (_strnicmp(component, "ResetData", 9) == 0 ||
-            _strnicmp(component, "Resetdata", 9) == 0)  // 대소문자 구분 없이 처리
-        {
-            CScriptGraphicObject* pObject = CScriptObjectManager::GetInstance()->GetObject(drawingName, objectName);
-            if (!pObject)
-                return false;
-
-            // ResetData 호출을 시도하고 결과 로깅
-            DebugLog("ResetData 함수 호출 시도: %s.%s", drawingName, objectName);
-            bool result = pObject->ResetData();
-            DebugLog("ResetData 함수 호출 결과: %s", result ? "성공" : "실패");
-            return result;
-        }
     }
-
     return false;
 }
+
 
 // 스크립트 엔진에서 호출하는 확장 함수 (4개 파라미터 버전)
 void __stdcall System_SetProperty(int nargs, c_variable** pargs, c_engine* p_engine)
@@ -1024,10 +1119,20 @@ bool _check_Object_SetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine*
     return true;
 }
 
-void CScriptObjectManager::DestroyInstance()
+bool _check_Object_GetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
-    if (s_instance) {
-        delete s_instance;
-        s_instance = nullptr;
+    if (n != 1) {
+        *p_msg = "GetCurSel 함수는 객체 참조 인자가 필요합니다.";
+        return false;
     }
+    return true;
+}
+
+bool _check_Object_GetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 1) {
+        *p_msg = "GetCurStr 함수는 객체 참조 인자가 필요합니다.";
+        return false;
+    }
+    return true;
 }

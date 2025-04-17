@@ -3074,6 +3074,10 @@ c_expression* c_engine::_primary()
 		}
 		break;
 
+	case token_type::system:
+
+		break;
+
 	case token_type::eos:
 		error(CUR_ERR_LINE, "unexpected end of line in expression.");
 		delete left;

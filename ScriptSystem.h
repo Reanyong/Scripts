@@ -58,12 +58,15 @@ public:
     bool SetCurStr(c_variable& value);
     bool SetCurSel(c_variable& value);
 
+    //20250416 Systen_object_GetCurStr
+    //20250416 Systen_object_GetCurSel
+    bool GetCurSel(c_variable& result);
+    bool GetCurStr(c_variable& result);
+
     // 추가 속성
     bool GetText(c_variable& result);
     bool SetText(c_variable& value);
 
-    bool GetForegroundColor(c_variable& result);
-    bool SetForegroundColor(c_variable& value);
 };
 
 // 그래픽 (도면)
@@ -127,5 +130,10 @@ bool _check_Object_SetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine*
 void __stdcall Object_SetCurSel(int nargs, c_variable** pargs, c_engine* p_engine);
 bool _check_Object_SetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 
+// System-Object-GetCurSel
+void __stdcall Object_GetCurSel(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);
+bool _check_Object_GetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
 
-
+// System-Object-GetCurStr
+void __stdcall Object_GetCurStr(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);
+bool _check_Object_GetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
