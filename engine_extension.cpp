@@ -296,6 +296,7 @@ void c_engine::add_standard_extension_functions()
 	VERIFY(add_extension_function("Object.GetCurSel", (PEXTENSION_FUNCTION_FUNCTION)Object_GetCurSel, _check_Object_GetCurSel));
 
 	VERIFY(add_extension_function("GetCurSel", (PEXTENSION_FUNCTION_FUNCTION)GetCurSel, _check_GetCurSel));
+	VERIFY(add_extension_function("GetCurStr", (PEXTENSION_FUNCTION_FUNCTION)GetCurStr, _check_GetCurStr));
 }
 
 void c_engine::add_standard_extension_subs()

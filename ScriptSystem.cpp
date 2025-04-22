@@ -3,6 +3,8 @@
 #include "ScriptSystem.h"
 #include "iWaterScriptFunc.h"
 
+#define BUFFER_SIZE 1024
+
 int GetReturnVal(int nTimeout, ST_GLOBAL& global, char* pszBuffer)
 {
     HANDLE hMailslot = INVALID_HANDLE_VALUE;
@@ -1138,6 +1140,7 @@ bool _check_Object_GetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine*
 }
 
 // FUNC
+// GetCurSel
 bool _check_GetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
 {
     if (n != 2)
@@ -1190,7 +1193,7 @@ void __stdcall GetCurSel(int nargs, c_variable** pargs, c_engine* p_engine, c_va
     cds.cbData = sizeof(ST_GLOBAL);
     cds.lpData = &global;
 
-    char buf[256];
+    char buf[BUFFER_SIZE];
     buf[0] = 0x0;
     int nRet = GetReturnVal(3000, global, buf);
     if (nRet == 1)
@@ -1201,5 +1204,77 @@ void __stdcall GetCurSel(int nargs, c_variable** pargs, c_engine* p_engine, c_va
     else
     {
         result = INT_MIN;
+    }
+}
+
+// GetCurStr
+bool _check_GetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 2)
+    {
+        *p_msg = "'GetCurStr' function gets 2 arguments.";
+        return false;
+    }
+    if (p_types[0] != VARENUM::VT_BSTR)
+    {
+        *p_msg = "The first parameter of GetCurStr function is not a string.";
+        return false;
+    }
+    if (p_types[1] != VARENUM::VT_BSTR)
+    {
+        *p_msg = "The second parameter of GetCurStr function is not a string.";
+        return false;
+    }
+
+    return true;
+}
+
+void __stdcall GetCurStr(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
+{
+    if (nargs != 2 || pargs[0]->vt != VT_BSTR || pargs[1]->vt != VT_BSTR)
+    {
+        result = INT_MIN;
+        return;
+    }
+
+    if (g_pTagCol == NULL)
+    {
+        result = INT_MIN;
+        return;
+    }
+
+    ST_GLOBAL global;
+
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_Get_OBJTEXT;  // 텍스트 가져오기 명령
+
+    c_string a, b;
+    pargs[0]->as_string(a);
+    pargs[1]->as_string(b);
+    strcpy_s(global.szParms1, a);
+    strcpy_s(global.szParms2, b);
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    char buf[BUFFER_SIZE] = { 0 };
+    int nRet = GetReturnVal(3000, global, buf);
+
+    // 문자열 결과 반환
+    if (nRet == 1)
+    {
+        result.vt = VT_BSTR;
+        CString sValue = buf;
+        result.bstrVal = sValue.AllocSysString();
+    }
+    else
+    {
+        // 오류 시 빈 문자열 반환
+        result.vt = VT_BSTR;
+        CString sValue = "";
+        result.bstrVal = sValue.AllocSysString();
     }
 }
