@@ -6,7 +6,9 @@
 #include <crtdbg.h>	// _ASSERT
 #include <malloc.h>
 
-#define NO_INDEX -3
+#ifndef NO_INDEX
+#define NO_INDEX (-3)
+#endif
 
 template <class T> class c_ptr_array
 {
@@ -261,7 +263,8 @@ void c_ptr_array<T>::set_last(T* p)
 template <class T>
 bool c_ptr_array<T>::contains(T* p)
 {
-	register int i;
+	//register int i; C++17 부터 register 키워드가 의미가 없음, C++20 부터는 완전히 제거 되었음.
+	int i;
 	for (i = 0; i < m_nsize; i++)
 		if (m_pdata[i] == p) return true;
 

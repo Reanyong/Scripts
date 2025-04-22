@@ -925,7 +925,7 @@ bool __cdecl System_SetProperty(const char* path, VARIANT* value)
             switch (value->vt)
             {
             case VT_I4:
-                val = value->lVal;
+                val = static_cast<int>(value->lVal);
                 break;
             case VT_BSTR:
                 // 문자열을 정수로 변환 시도
@@ -935,7 +935,7 @@ bool __cdecl System_SetProperty(const char* path, VARIANT* value)
                 char* str = W2A(value->bstrVal);
                 long lval = strtol(str, &endptr, 10);
                 if (*endptr == '\0') // 변환 성공
-                    val = lval;
+                    val = static_cast<int>(lval);
                 else {
                     DebugLog("오류: SetCurSel 속성에는 숫자만 허용됩니다 (입력값: '%s')", str);
                     return false;

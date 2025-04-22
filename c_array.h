@@ -4,7 +4,9 @@
 #include "new.h"
 #include <crtdbg.h>
 
-#define NO_INDEX	-3
+#ifndef NO_INDEX
+#define NO_INDEX (-3)
+#endif
 
 template <class T> class c_array
 {
@@ -348,5 +350,4 @@ bool c_array<T>::contains(T& element)
 
 	return false;
 }
-
 #endif

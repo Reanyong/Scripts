@@ -271,7 +271,7 @@ void c_expression::exec(c_variable* p_result)
 		//todo. jkh
 		if (m_var_desc.m_name[0] == '@')
 		{
-			CString szName = m_var_desc.m_name;
+			CString szName = m_var_desc.m_name.get_buffer();
 			if (szName.Left(1) == "@")
 				szName = szName.Right(szName.GetLength() - 1);
 			if (!CheckValidTagName(szName))
@@ -473,7 +473,8 @@ void c_expression::exec(c_variable* p_result)
 		{
 			c_variable v;
 			m_pright->exec(&v);
-			*p_result = -v;
+			c_variable temp = -v;
+			*p_result = temp;
 		}
 		break;
 

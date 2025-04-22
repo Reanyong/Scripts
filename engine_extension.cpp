@@ -941,7 +941,7 @@ _args_done: // all expressions parsed. check types.
 				}
 				c_string tagename = "";
 				expressions[0]->m_constant.as_string(tagename);
-				CString strTemp = tagename;
+				CString strTemp = tagename.get_buffer();
 				if (tagename!="")
 				{
 					if (!CheckValidTagName(tagename))
@@ -1182,10 +1182,10 @@ bool c_engine::is_property_get_context()
 	case token_type::lesse:
 	case token_type::greatere:
 
-	case token_type::not:
-	case token_type::and :
-	case token_type:: or :
-	case token_type::xor :
+	case token_type::not_op:
+	case token_type::and_op:
+	case token_type:: or_op:
+	case token_type::xor_op:
 
 	case token_type::if_cond:
 	case token_type::for_cond:
@@ -1548,21 +1548,21 @@ c_disp_get* c_engine::disp_get(bool& b_var, ITypeInfo* def_pti)
 		if (m_char_stream.check() != '.')
 		{
 			b_var = true;
-			return false;
+			return nullptr;
 		}
 
 		gettok();
 		if (curtok.type != token_type::dot)
 		{
 			error(CUR_ERR_LINE, "'.' expected after '%s'", curtok.m_name);
-			return false;
+			return nullptr;
 		}
 
 		gettok();
 		if (!curtok.disp_name())
 		{
 			error(CUR_ERR_LINE, "member property or method expected after '%s'", prevtok.m_name);
-			return false;
+			return nullptr;
 		}
 	}
 

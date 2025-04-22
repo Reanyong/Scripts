@@ -803,7 +803,7 @@ STDMETHODIMP Basic::IsRoutine(/*[in]*/ BSTR str,
 							  /*[out, retval]*/ VARIANT_BOOL* bRet)
 {
 	c_string s_str = str;
-	*bRet = (m_engine.is_routine(s_str.get_buffer(), length) ? -1 : 0);
+	*bRet = (m_engine.is_routine(s_str.get_buffer(), static_cast<int>(length)) ? -1 : 0);
 	return S_OK;
 }
 

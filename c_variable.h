@@ -262,17 +262,19 @@ public:
 	void operator = (bool val);
 	void operator = (SAFEARRAY* p_array);
 
-	c_variable operator -  ();
+	c_variable operator - ();
 	void operator += (c_variable& val);
 
-	bool operator <  (c_variable& val);
-	bool operator >  (c_variable& val);
-	bool operator <= (c_variable& val);
-	bool operator >= (c_variable& val);
-	bool operator == (c_variable& val);
-	bool operator != (c_variable& val);
+	bool operator <  (const c_variable& val) const;
+	bool operator >  (const c_variable& val) const;
+	bool operator <= (const c_variable& val) const;
+	bool operator >= (const c_variable& val) const;
+	bool operator == (const c_variable& val) const;
+	bool operator != (const c_variable& val) const;
 
 	bool operator ! ();
+
+	void operator = (c_variable&& val);
 	void ref(c_variable* p_var);
 
 	// typecast

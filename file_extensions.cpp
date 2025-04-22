@@ -162,7 +162,7 @@ bool _check_move_file(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engi
 //-----------------------------------------------------------------------------
 
 void __stdcall file_exists(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
-{	
+{
 	if (nargs != 1)
 	{
 		result = 0;
@@ -198,7 +198,7 @@ void __stdcall delete_file(int nargs, c_variable** pargs, c_engine* p_engine, c_
 	//_ASSERT(nargs == 1);
 	if (nargs != 1)
 	{
-		result = 0; 
+		result = 0;
 		return;
 	}
 	struct _stat s;
@@ -327,7 +327,7 @@ void __stdcall file_size(int nargs, c_variable** pargs, c_engine* p_engine, c_va
 		return;
 	}
 
-	result = s.st_size;
+	result = (double)s.st_size;
 }
 
 bool _check_file_size(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
