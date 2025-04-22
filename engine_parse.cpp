@@ -181,7 +181,6 @@ bool c_engine::_pre_parse()
 					error(CUR_ERR_LINE, "InValid TagName ["+tagname +"]");
 					return false;
 				}
-
 			}
 			if (curtok.type == token_type::system ||
 				curtok.type == token_type::graphic ||

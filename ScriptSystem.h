@@ -137,3 +137,8 @@ bool _check_Object_GetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine*
 // System-Object-GetCurStr
 void __stdcall Object_GetCurStr(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);
 bool _check_Object_GetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
+
+// Func
+// GetCurSel
+bool _check_GetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine);
+void __stdcall GetCurSel(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result);

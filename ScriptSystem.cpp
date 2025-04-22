@@ -1136,3 +1136,70 @@ bool _check_Object_GetCurStr(int n, VARENUM* p_types, c_string* p_msg, c_engine*
     }
     return true;
 }
+
+// FUNC
+bool _check_GetCurSel(int n, VARENUM* p_types, c_string* p_msg, c_engine* p_engine)
+{
+    if (n != 2)
+    {
+        *p_msg = "'GetCurSel' function gets 2 arguments.";
+        return false;
+    }
+    if (p_types[0] != VARENUM::VT_BSTR)
+    {
+        *p_msg = "The first parameter of GetCurSel function is not a string.";
+        return false;
+    }
+    if (p_types[1] != VARENUM::VT_BSTR)
+    {
+        *p_msg = "The second parameter of GetCurSel function is not a string.";
+        return false;
+    }
+
+    return true;
+}
+
+void __stdcall GetCurSel(int nargs, c_variable** pargs, c_engine* p_engine, c_variable& result)
+{
+    if (nargs != 2 || pargs[0]->vt != VT_BSTR || pargs[1]->vt != VT_BSTR)
+    {
+        result = INT_MIN;
+        return;
+    }
+
+    if (g_pTagCol == NULL)
+    {
+        result = INT_MIN;
+        return;
+    }
+
+    ST_GLOBAL global;
+
+    ZeroMemory(&global, sizeof(ST_GLOBAL));
+    global.nMode = GM_GV_Get_OBJCURSEL;
+
+    c_string a, b;
+    pargs[0]->as_string(a);
+    pargs[1]->as_string(b);
+    strcpy_s(global.szParms1, a);
+    strcpy_s(global.szParms2, b);
+
+    COPYDATASTRUCT cds;
+    ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
+    cds.dwData = GM_COPYDATA_SCRIPT_CODE;
+    cds.cbData = sizeof(ST_GLOBAL);
+    cds.lpData = &global;
+
+    char buf[256];
+    buf[0] = 0x0;
+    int nRet = GetReturnVal(3000, global, buf);
+    if (nRet == 1)
+    {
+        nRet = atoi(buf);
+        result = nRet;
+    }
+    else
+    {
+        result = INT_MIN;
+    }
+}

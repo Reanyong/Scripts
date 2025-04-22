@@ -4,7 +4,9 @@
 #include "new.h"
 #include <crtdbg.h>
 
-template <class T> class c_array  
+#define NO_INDEX	-3
+
+template <class T> class c_array
 {
 	T*	m_pdata;
 	int	m_nsize;
@@ -318,7 +320,7 @@ void c_array<T>::swap(int n1, int n2)
 {
 	_ASSERT(n1 >= 0 && n1 < m_nsize);
 	_ASSERT(n2 >= 0 && n2 < m_nsize);
-	
+
 	T* p = (T*)malloc(sizeof(T));
 	if (p!=NULL)
 	{
@@ -327,7 +329,7 @@ void c_array<T>::swap(int n1, int n2)
 		memcpy(&m_pdata[n2], p, sizeof(T));
 		free(p);
 	}
-	
+
 }
 
 //-----------------------------------------------------------------------------

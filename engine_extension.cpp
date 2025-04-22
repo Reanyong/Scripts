@@ -294,6 +294,8 @@ void c_engine::add_standard_extension_functions()
 
 	VERIFY(add_extension_function("Object.GetCurStr", (PEXTENSION_FUNCTION_FUNCTION)Object_GetCurStr, _check_Object_GetCurStr));
 	VERIFY(add_extension_function("Object.GetCurSel", (PEXTENSION_FUNCTION_FUNCTION)Object_GetCurSel, _check_Object_GetCurSel));
+
+	VERIFY(add_extension_function("GetCurSel", (PEXTENSION_FUNCTION_FUNCTION)GetCurSel, _check_GetCurSel));
 }
 
 void c_engine::add_standard_extension_subs()
@@ -1181,9 +1183,9 @@ bool c_engine::is_property_get_context()
 	case token_type::greatere:
 
 	case token_type::not:
-	case token_type::and:
-	case token_type::or:
-	case token_type::xor:
+	case token_type::and :
+	case token_type:: or :
+	case token_type::xor :
 
 	case token_type::if_cond:
 	case token_type::for_cond:
@@ -1196,6 +1198,7 @@ bool c_engine::is_property_get_context()
 	case token_type::until_cond:
 	case token_type::select_cond:
 	case token_type::case_cond:
+
 		return true;
 	}
 

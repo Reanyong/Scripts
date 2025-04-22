@@ -6,6 +6,8 @@
 #include <crtdbg.h>	// _ASSERT
 #include <malloc.h>
 
+#define NO_INDEX -3
+
 template <class T> class c_ptr_array
 {
 	int		m_nsize;

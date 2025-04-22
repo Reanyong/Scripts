@@ -41,7 +41,7 @@ void c_ext_func::exec(c_variable* p_result)
 	c_ptr_array<c_variable>	ptr_args;
 	get_argument_pointers(ptr_args, args);
 
-	m_pfunction(ptr_args.get_size(), ptr_args.get_data(), m_pengine, *p_result);	// call the function	
+	m_pfunction(ptr_args.get_size(), ptr_args.get_data(), m_pengine, *p_result);	// call the function
 
 #ifdef _DEBUG
 	int i;
