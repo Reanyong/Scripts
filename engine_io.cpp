@@ -313,6 +313,7 @@ void c_engine::runtime_error(int n_line, const char *format, ...)
 	vsprintf(err, format, arglist);
 	va_end(arglist);
 
+	//AddError(n_line, err);
 	error(n_line, err);
 
 // and then break execution
@@ -360,6 +361,7 @@ void c_engine::runtime_error(HRESULT hr)
 	}
 }
 
+/*
 void c_engine::error(int n_line, const char *format, ...)
 {
 	char err_str[MAX_ERR_LENGTH + 1];
@@ -393,6 +395,132 @@ void c_engine::error(int n_line, const char *format, ...)
 	if (m_str_error.get_length()) m_str_error += "\r\n";
 	m_str_error += err_str;
 }
+*/
+
+void c_engine::error(int nLine, const char* format, ...)
+{
+	char err[MAX_ERR_LENGTH + 1];
+	va_list arglist;
+	va_start(arglist, format);
+	vsprintf_s(err, MAX_ERR_LENGTH, format, arglist);
+	va_end(arglist);
+
+	// 실제 에러 라인 계산
+	int n_actual_error_line;
+	switch (nLine)
+	{
+	case CUR_ERR_LINE:
+		n_actual_error_line = m_atom_table.get_cur_line();
+		if (n_actual_error_line == -1)
+			n_actual_error_line = m_char_stream.cur_line();
+		break;
+
+	case NO_ERR_LINE:
+		n_actual_error_line = -1;
+		break;
+
+	default:
+		n_actual_error_line = nLine;
+	}
+
+	// 현재 루틴 이름 가져오기
+	const char* routineName = NULL;
+	if (m_pcur_routine_entry) {
+		routineName = m_pcur_routine_entry->get_var_desc()->get_name();
+	}
+
+	// 오류 정보 생성 전 로그
+	DebugLog("오류 생성 전: 라인=%d, 메시지=%s, 루틴=%s",
+		n_actual_error_line, err, routineName ? routineName : "NULL");
+
+	// 오류 정보 추가
+	ErrorInfo info(n_actual_error_line, err, routineName, false);
+
+	// ErrorInfo 생성 후 로그
+	DebugLog("ErrorInfo 생성 후: 라인=%d, 메시지=%s, 루틴=%s",
+		info.nLine,
+		info.message.get_buffer() ? info.message.get_buffer() : "NULL",
+		info.routineName.get_buffer() ? info.routineName.get_buffer() : "NULL");
+
+	// m_errors 배열에 추가하기 전
+	DebugLog("오류 추가 전 m_errors 크기: %d", m_errors.get_size());
+
+	m_errors.add(info);
+
+	// m_errors 배열에 추가한 후
+	DebugLog("오류 추가 후 m_errors 크기: %d", m_errors.get_size());
+
+	if (m_errors.get_size() > 0) {
+		ErrorInfo& lastError = m_errors[m_errors.get_size() - 1];
+		DebugLog("마지막 오류 확인: 라인=%d, 메시지=%s",
+			lastError.nLine,
+			lastError.message.get_buffer() ? lastError.message.get_buffer() : "NULL");
+	}
+
+	// 기존 호환성을 위해 첫 번째 오류 메시지만 m_str_error에 저장
+	if (m_str_error.get_length() == 0) {
+		char err_str[MAX_ERR_LENGTH + 1];
+		if (n_actual_error_line != -1)
+			sprintf_s(err_str, "line: %d error: %s", n_actual_error_line, err);
+		else
+			sprintf_s(err_str, "error: %s", err);
+
+		m_str_error = err_str;
+	}
+
+	// 중요: m_bContinueOnError가 true면 예외를 던지지 않음
+	if (!m_bContinueOnError) {
+		//throw std::runtime_error(err);
+	}
+}
+
+/*
+void c_engine::AddError(int nLine, const char* format, ...)
+{
+	char buffer[MAX_ERR_LENGTH + 1];
+	va_list args;
+	va_start(args, format);
+	vsprintf_s(buffer, MAX_ERR_LENGTH, format, args);
+	va_end(args);
+
+	// 실제 에러 라인 계산
+	int n_actual_error_line;
+	switch (nLine)
+	{
+	case CUR_ERR_LINE:
+		n_actual_error_line = m_atom_table.get_cur_line();
+		if (n_actual_error_line == -1)
+			n_actual_error_line = m_char_stream.cur_line();
+		break;
+	case NO_ERR_LINE:
+		n_actual_error_line = -1;
+		break;
+	default:
+		n_actual_error_line = nLine;
+	}
+
+	// 현재 루틴 이름 가져오기
+	const char* routineName = NULL;
+	if (m_pcur_routine_entry) {
+		routineName = m_pcur_routine_entry->get_var_desc()->get_name();
+	}
+
+	// 오류 정보 추가
+	ErrorInfo info(n_actual_error_line, buffer, routineName, false);
+	m_errors.add(info);
+
+	// 기존 호환성을 위해 첫 번째 오류는 m_str_error에도 저장
+	if (m_str_error.get_length() == 0) {
+		char err_str[MAX_ERR_LENGTH + 1];
+		if (n_actual_error_line != -1)
+			_snprintf(err_str, MAX_ERR_LENGTH, "line: %d error: %s", n_actual_error_line, buffer);
+		else
+			_snprintf(err_str, MAX_ERR_LENGTH, "error: %s", buffer);
+
+		m_str_error = err_str;
+	}
+}
+*/
 
 void c_engine::stop()
 {
@@ -436,6 +564,8 @@ bool c_engine::set_buffer(const char* pData)
 
 bool c_engine::check_syntax(const char* p_code)
 {
+	ClearAllErrors();
+
 	internal_reset();
 	m_char_stream.set_buffer(p_code);
 	m_str_error.empty();
@@ -814,49 +944,24 @@ const char* c_engine::get_error_descr()
 	return p;
 }
 
-// 오류 수집 함수 구현
-void c_engine::AddError(int nLine, const char* format, ...)
-{
-	char err[MAX_ERR_LENGTH + 1];
-
-	va_list arglist;
-	va_start(arglist, format);
-	vsprintf_s(err, MAX_ERR_LENGTH, format, arglist);
-	va_end(arglist);
-
-	int n_actual_error_line;
-	switch (nLine)
-	{
-	case CUR_ERR_LINE:
-		n_actual_error_line = m_atom_table.get_cur_line();
-		if (n_actual_error_line == -1)
-			n_actual_error_line = m_char_stream.cur_line();
-		break;
-
-	case NO_ERR_LINE: n_actual_error_line = -1;
-		break;
-
-	default: n_actual_error_line = nLine;
-	}
-
-	// 현재 루틴 이름 가져오기
-	const char* routineName = NULL;
-	if (m_pcur_routine_entry) {
-		routineName = m_pcur_routine_entry->get_var_desc()->get_name();
-	}
-
-	// 오류 정보 추가
-	ErrorInfo info(n_actual_error_line, err, routineName, false);
-	m_errors.add(info);
-
-	// 기존 오류 로그에도 추가
-	error(n_actual_error_line, err);
-}
-
 void c_engine::AddWarning(int nLine, const char* format, ...)
 {
-	// AddError와 유사하게 구현
-	// ...
+	char buffer[1024] = { 0 };
+	va_list args;
+	va_start(args, format);
+	_vsnprintf_s(buffer, sizeof(buffer) - 1, format, args);
+	va_end(args);
+
+	// 현재 루틴 이름 가져오기
+	c_string routineName;
+	int temp_line = 0;
+	get_line_context(nLine, &temp_line, &routineName);
+
+	// 경고 추가
+	ErrorInfo warning(nLine, buffer, routineName.get_buffer(), true);
+	m_errors.add(warning);
+
+	DebugLog("경고 추가: 라인=%d, 메시지=%s", nLine, buffer);
 }
 
 int c_engine::GetErrorCount() const
@@ -881,22 +986,34 @@ int c_engine::GetWarningCount() const
 
 void c_engine::PrintAllErrors(bool bToDebugger)
 {
+
+	DebugLog("PrintAllErrors 호출: 오류 개수=%d", m_errors.get_size());
+
 	if (m_errors.get_size() == 0) {
 		if (bToDebugger) dbg_print("컴파일 성공: 오류 없음");
 		return;
 	}
 
-	c_string output = "컴파일 결과:\r\n";
+	// 먼저 라인 번호로 정렬
+	for (int i = 0; i < m_errors.get_size() - 1; i++) {
+		for (int j = 0; j < m_errors.get_size() - i - 1; j++) {
+			if (m_errors[j].nLine > m_errors[j + 1].nLine) {
+				ErrorInfo temp = m_errors[j];
+				m_errors[j] = m_errors[j + 1];
+				m_errors[j + 1] = temp;
+			}
+		}
+	}
+
+	c_string output;
 	char buffer[MAX_ERR_LENGTH + 1];
 
-	sprintf_s(buffer, "오류: %d개, 경고: %d개\r\n", GetErrorCount(), GetWarningCount());
-	output += buffer;
+	sprintf_s(buffer, "컴파일 오류\r\n오류: %d개, 경고: %d개\r\n", GetErrorCount(), GetWarningCount());
+	output = buffer;
 	output += "--------------------------------------------\r\n";
 
 	for (int i = 0; i < m_errors.get_size(); i++) {
 		const ErrorInfo& info = m_errors[i];
-
-		c_string line;
 
 		if (info.bWarning) {
 			if (info.nLine != -1) {
@@ -936,10 +1053,15 @@ void c_engine::PrintAllErrors(bool bToDebugger)
 					const_cast<c_string&>(info.message).get_buffer());
 			}
 		}
-
 		output += buffer;
 	}
 
+	DebugLog("최종 출력: %s", output.get_buffer());
+
+	// MessageBox로 표시
+	::MessageBox(NULL, output.get_buffer(), "컴파일 오류", MB_OK | MB_ICONERROR);
+
+	// 디버거에 출력
 	if (bToDebugger) {
 		dbg_print(output.get_buffer());
 	}

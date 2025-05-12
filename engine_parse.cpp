@@ -141,6 +141,7 @@ bool c_engine::parse()
 	// 오류 또는 경고가 있으면 결과 출력
 	if (GetErrorCount() > 0 || GetWarningCount() > 0) {
 		PrintAllErrors(true);
+		DebugLog("파싱 완료: 오류=%d, 경고=%d", GetErrorCount(), GetWarningCount());
 	}
 
 	// 오류가 하나라도 있으면 false 반환
@@ -521,6 +522,11 @@ DWORD c_engine::_parse(c_vector_table& last, DWORD stop_at)
 
 		case token_type::for_cond:
 			n = parse_for(last, stop_at);
+			if (n == ERR_ && m_bContinueOnError)
+			{
+				gettok();
+				n = TO_GO;
+			}
 			break;
 
 		case token_type::while_cond:

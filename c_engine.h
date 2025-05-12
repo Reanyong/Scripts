@@ -86,15 +86,40 @@ struct bar_array
 // ㅡㅡERROR STRUCTUREㅡㅡ
 
 struct ErrorInfo {
-	int nLine;                  // 오류 발생 라인
-	c_string message;           // 오류 메시지
-	c_string routineName;       // 오류가 발생한 루틴 이름 (있는 경우)
-	bool bWarning;              // 경고 여부 (true: 경고, false: 오류)
+	int nLine;
+	c_string message;
+	c_string routineName;
+	bool bWarning;
 
 	ErrorInfo() : nLine(-1), bWarning(false) {}
 
 	ErrorInfo(int line, const char* msg, const char* routine = NULL, bool warning = false)
-		: nLine(line), message(msg), routineName(routine ? routine : ""), bWarning(warning) {}
+		: nLine(line), bWarning(warning)
+	{
+		if (msg) message = msg;
+		if (routine) routineName = routine;
+	}
+
+	// 복사 생성자
+	ErrorInfo(const ErrorInfo& other)
+		: nLine(other.nLine),
+		message(other.message),
+		routineName(other.routineName),
+		bWarning(other.bWarning)
+	{
+	}
+
+	// 대입 연산자
+	ErrorInfo& operator=(const ErrorInfo& other)
+	{
+		if (this != &other) {
+			nLine = other.nLine;
+			message = other.message;
+			routineName = other.routineName;
+			bWarning = other.bWarning;
+		}
+		return *this;
+	}
 };
 
 //-----------------------------------------------------------------------------

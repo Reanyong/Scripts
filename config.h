@@ -15,7 +15,7 @@ enum class run_mode
 	run_to_line		= 5
 };
 
-#define MAX_ERR_LENGTH		255			// max length of error report string
+#define MAX_ERR_LENGTH		512			// max length of error report string
 #define CUR_ERR_LINE		-1			// m_char_stream's current line
 #define NO_ERR_LINE			-2			// don't report line
 

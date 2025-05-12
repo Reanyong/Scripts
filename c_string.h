@@ -12,7 +12,7 @@ class c_string
 
 public:
 	c_string();
-	c_string(c_string& origin);
+	c_string(const c_string& origin);
 	c_string(const char* p_str);
 	c_string(BSTR bstr);
 	~c_string();
@@ -33,9 +33,9 @@ public:
 	void operator += (const int			val);
 	void operator += (const double		val);
 
-	const char* get_buffer()
+	const char* get_buffer() const
 	{
-		return m_pdata;
+		return m_pdata ? m_pdata : "";  // NULL이면 빈 문자열 반환
 	}
 
 	void empty();
