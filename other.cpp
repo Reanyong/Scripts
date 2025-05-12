@@ -169,7 +169,7 @@ void __stdcall MsgBox(int nargs, c_variable** pargs, c_engine* p_engine, c_varia
 	}
 	if (str_title == "")
 		str_title = "MsgBox";
-	CString strMsg = str_text;
+	CString strMsg = str_text.get_buffer();
 	//CString strTest = "aaaa\nssss";
 	result = MessageBox(0, strMsg, str_title.get_buffer(), n_flags | MB_SYSTEMMODAL);
 }
@@ -536,7 +536,7 @@ void __stdcall ToggleDigitalPoint(int nargs, c_variable** pargs, c_engine* p_eng
 	c_string str_TagName = "";
 	double TagValue = 0;
 	int n_flags = 0;
-	CString s = str_TagName;
+	CString s = str_TagName.get_buffer();
 	time_t t=0;
 	pargs[0]->as_string(str_TagName);
 	result = g_pTagCol->GetTagValue((char*)str_TagName.get_buffer(), TagValue, &t);
@@ -1237,7 +1237,7 @@ void __stdcall sprintf(int nargs, c_variable** pargs, c_engine* p_engine, c_vari
 		c_string buffer = "";
 		c_string FormatString = "";
 		pargs[0]->as_string(FormatString);
-		CString strOrg = FormatString;
+		CString strOrg = FormatString.get_buffer();
 		CString strTemp = "";
 		if (nargs > 1)
 		{
@@ -1328,7 +1328,7 @@ void __stdcall ChgEngActiveStandby(int nargs, c_variable** pargs, c_engine* p_en
 			return;
 		c_string temp = "";
 		pargs[0]->as_string(temp);
-		CString strTemp = temp;
+		CString strTemp = temp.get_buffer();
 		char szNode[64] = { 0 };
 		sprintf_s(szNode, "%s", (LPSTR)(LPCTSTR)strTemp);
 		int nRet=g_pTagCol->ChgEngActiveStandby(szNode);

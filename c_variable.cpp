@@ -1363,42 +1363,42 @@ void c_variable::operator += (c_variable& val)
 
 // operator < -----------------------------------------------------------------
 
-bool c_variable::operator < (c_variable& val)
+bool c_variable::operator < (const c_variable& val) const
 {
-	HRESULT hr = VarCmp(get_scalar_ptr(), val.get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
+	HRESULT hr = VarCmp(const_cast<c_variable*>(this)->get_scalar_ptr(), const_cast<c_variable*>(&val)->get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
 	return hr == VARCMP_LT;
 }
 
 // operator > -----------------------------------------------------------------
 
-bool c_variable::operator > (c_variable& val)
+bool c_variable::operator > (const c_variable& val) const
 {
-	HRESULT hr = VarCmp(get_scalar_ptr(), val.get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
+	HRESULT hr = VarCmp(const_cast<c_variable*>(this)->get_scalar_ptr(), const_cast<c_variable*>(&val)->get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
 	return hr == VARCMP_GT;
 }
 
 // operator <= ----------------------------------------------------------------
 
-bool c_variable::operator <= (c_variable& val)
+bool c_variable::operator <= (const c_variable& val) const
 {
-	HRESULT hr = VarCmp(get_scalar_ptr(), val.get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
+	HRESULT hr = VarCmp(const_cast<c_variable*>(this)->get_scalar_ptr(), const_cast<c_variable*>(&val)->get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
 	return (hr == VARCMP_LT) || (hr == VARCMP_EQ);
 }
 
 // operator >= ----------------------------------------------------------------
 
-bool c_variable::operator >= (c_variable& val)
+bool c_variable::operator >= (const c_variable& val) const
 {
-	HRESULT hr = VarCmp(get_scalar_ptr(), val.get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
+	HRESULT hr = VarCmp(const_cast<c_variable*>(this)->get_scalar_ptr(), const_cast<c_variable*>(&val)->get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
 	return (hr == VARCMP_GT) || (hr == VARCMP_EQ);
 }
 
 // operator == ----------------------------------------------------------------
 
-bool c_variable::operator == (c_variable& val)
+bool c_variable::operator == (const c_variable& val) const
 {
-	c_variable* p1 = (c_variable*)get_scalar_ptr();
-	c_variable* p2 = (c_variable*)val.get_scalar_ptr();
+	c_variable* p1 = const_cast<c_variable*>(this)->get_scalar_ptr();
+	c_variable* p2 = const_cast<c_variable*>(&val)->get_scalar_ptr();
 
 	// well.... probably this can be uncommented...
 /*
@@ -1418,9 +1418,9 @@ bool c_variable::operator == (c_variable& val)
 
 // operator != ----------------------------------------------------------------
 
-bool c_variable::operator != (c_variable& val)
+bool c_variable::operator != (const c_variable& val) const
 {
-	HRESULT hr = VarCmp(get_scalar_ptr(), val.get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
+	HRESULT hr = VarCmp(const_cast<c_variable*>(this)->get_scalar_ptr(), const_cast<c_variable*>(&val)->get_scalar_ptr(), LOCALE_USER_DEFAULT, NORM_IGNORECASE);
 	return hr != VARCMP_EQ;
 }
 
@@ -1475,7 +1475,8 @@ void c_variable::as_string(c_string& str)
 			else
 			{
 				//hr = VarFormatNumber(p, 14, 0, 0, 0, 0, &bstr);
-				hr = VarFormat(p, L"", 0, 0, 0, &bstr);
+				OLECHAR emptyStr[] = L"";
+				hr = VarFormat(p, emptyStr, 0, 0, 0, &bstr);
 				if (FAILED(hr))
 				{
 					c_engine* p_engine = get_engine();

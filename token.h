@@ -28,10 +28,10 @@ enum class token_type
 	lesse				= '<=',
 	greatere			= '>=',
 
-	not					= 'N',
-	and					= 'A',
-	or					= 'O',
-	xor					= 'X',
+	not_op				= 'N',
+	and_op				= 'A',
+	or_op				= 'O',
+	xor_op				= 'X',
 
 	remark				= '\'',
 	assign				= '=',
@@ -193,10 +193,10 @@ static token_type reserved_cond[] =
 	token_type::print_cond,
 	token_type::input_cond,
 	token_type::reminder,
-	token_type::not,
-	token_type::and,
-	token_type::or,
-	token_type::xor,
+	token_type::not_op,
+	token_type::and_op,
+	token_type::or_op,
+	token_type::xor_op,
 	token_type::dialog_cond,
 	token_type::enddialog_cond,
 	token_type::beep_cond,
@@ -307,10 +307,10 @@ public:
 		case token_type::lesse:		m_format = "'<'"; break;
 		case token_type::greatere:	m_format = "'>'"; break;
 
-		case token_type::not:		m_format = "not"; break;
-		case token_type::and:		m_format = "and"; break;
-		case token_type::or:		m_format = "or"; break;
-		case token_type::xor:		m_format = "xor"; break;
+		case token_type::not_op:		m_format = "not"; break;
+		case token_type::and_op:		m_format = "and"; break;
+		case token_type::or_op:			m_format = "or"; break;
+		case token_type::xor_op:		m_format = "xor"; break;
 
 		case token_type::eos:		m_format = "end of string"; break;
 		case token_type::eof:		m_format = "end of file"; break;

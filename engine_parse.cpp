@@ -141,6 +141,7 @@ bool c_engine::parse()
 	// 오류 또는 경고가 있으면 결과 출력
 	if (GetErrorCount() > 0 || GetWarningCount() > 0) {
 		PrintAllErrors(true);
+		DebugLog("파싱 완료: 오류=%d, 경고=%d", GetErrorCount(), GetWarningCount());
 	}
 
 	// 오류가 하나라도 있으면 false 반환
@@ -181,7 +182,6 @@ bool c_engine::_pre_parse()
 					error(CUR_ERR_LINE, "InValid TagName ["+tagname +"]");
 					return false;
 				}
-
 			}
 			if (curtok.type == token_type::system ||
 				curtok.type == token_type::graphic ||
@@ -522,6 +522,11 @@ DWORD c_engine::_parse(c_vector_table& last, DWORD stop_at)
 
 		case token_type::for_cond:
 			n = parse_for(last, stop_at);
+			if (n == ERR_ && m_bContinueOnError)
+			{
+				gettok();
+				n = TO_GO;
+			}
 			break;
 
 		case token_type::while_cond:
@@ -3058,7 +3063,7 @@ c_expression* c_engine::_primary()
 		left = _primary();			// just try again
 		break;
 
-	case token_type::not:
+	case token_type::not_op:
 		{
 			gettok();						// ommit 'not'
 			c_expression* p_expr = _primary();	// expression after 'not'
@@ -3351,7 +3356,7 @@ c_expression* c_engine::_expr_and()
 	for(;;)
 		switch(curtok.type)
 		{
-		case token_type::and:
+		case token_type::and_op:
 			{
 				gettok();
 				c_expression* expr = new c_expression(&m_call_stack, &m_atom_table, this);
@@ -3379,7 +3384,7 @@ c_expression* c_engine::_expr()
 	for(;;)
 		switch(curtok.type)
 		{
-		case token_type::xor:
+		case token_type::xor_op:
 			{
 				gettok();
 				c_expression* expr = new c_expression(&m_call_stack, &m_atom_table, this);
@@ -3395,7 +3400,7 @@ c_expression* c_engine::_expr()
 			}
 		    break;
 
-		case token_type:: or:
+		case token_type:: or_op:
 			{
 				gettok();
 				c_expression* expr = new c_expression(&m_call_stack, &m_atom_table, this);
@@ -3968,7 +3973,7 @@ c_expression* c_engine::parse_system_expression(const char* expr_str, const char
 
 		if (endptr != trimmed_expr) {
 			p_expr->m_action = c_action::_const;
-			p_expr->m_constant = value;
+			p_expr->m_constant = (int)value;
 		}
 		else {
 			error(CUR_ERR_LINE, "SetCurSel 속성에는 숫자 값만 허용됩니다 (입력값: '%s')", trimmed_expr);

@@ -12,7 +12,8 @@ HRESULT co_create_instance(CLSID clsid, IDispatch** ppd);
 inline bool is_NULL_GUID(GUID* p)
 {
 	unsigned char* pp = (unsigned char*) p;
-	register int i;
+	//register int i; C++17 부터 register 키워드가 의미가 없음, C++20 부터는 완전히 제거 되었음.
+	int i;
 
 	for (i = 0; i < sizeof(GUID); i++)
 		if (pp[i] != 0) return false;

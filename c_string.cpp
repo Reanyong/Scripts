@@ -19,24 +19,20 @@ c_string::c_string()
 }
 
 
-c_string::c_string(c_string& origin)
+c_string::c_string(const c_string& origin)
 {
-	m_ngrow		= MIN_C_STRING_GROW;
+	m_ngrow = MIN_C_STRING_GROW;
+	m_pdata = NULL;
+	m_nalloc = 0;
+	m_nlength = 0;
 
-	if (origin.m_nlength == 0)
+	if (origin.m_nlength > 0 && origin.m_pdata)
 	{
-		m_nlength = 0;
-		m_pdata		= 0;
-		m_nalloc	= 0;
-		m_nlength	= 0;
-		return;
+		m_pdata = (char*)malloc(origin.m_nlength + 1);
+		m_nalloc = origin.m_nlength;
+		m_nlength = origin.m_nlength;
+		memcpy(m_pdata, origin.m_pdata, origin.m_nlength + 1);
 	}
-
-	m_pdata   = (char*)malloc(origin.m_nlength + 1);
-	m_nalloc  = origin.m_nlength;
-	m_nlength = origin.m_nlength;
-
-	memcpy(m_pdata, origin.m_pdata, origin.m_nlength + 1);
 }
 
 c_string::c_string(const char* p_str)
@@ -170,14 +166,21 @@ void c_string::operator += (const char* p_origin)
 	int n_str_length = (int)strlen(p_origin);
 	if (!n_str_length) return;
 
-	if(m_nlength + n_str_length > m_nalloc)
+	// 디버그 로그
+	int old_length = m_nlength;
+
+	if (m_nlength + n_str_length > m_nalloc)
 	{
-		m_nalloc  =  m_nlength + n_str_length;
-		m_pdata   =  (char*)realloc(m_pdata, m_nalloc + 1);
+		m_nalloc = m_nlength + n_str_length;
+		m_pdata = (char*)realloc(m_pdata, m_nalloc + 1);
 	}
 
 	strcpy(m_pdata + m_nlength, p_origin);
 	m_nlength += n_str_length;
+
+	// 디버그 로그
+	DebugLog("c_string += : 이전 길이=%d, 추가 길이=%d, 새 길이=%d",
+		old_length, n_str_length, m_nlength);
 }
 
 void c_string::operator += (const char _char)

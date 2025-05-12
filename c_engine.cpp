@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 
 #include "c_engine.h"
 #include "c_input_atom.h"
@@ -288,7 +288,7 @@ bool c_engine::can_be_identifier(const char* p_name, bool b_verbose)
 	const char* p = p_name;
 	while(*p)
 	{
-		// Æ¯¼ö¹®ÀÚ Ãß°¡ jkh
+		// íŠ¹ìˆ˜ë¬¸ì ì¶”ê°€ jkh
 		if (!isalnum(*p) && *p != '_' && *p != '$' && *p != '@' && *p != '-' && *p != '.')
 		{
  			if (b_verbose)

@@ -146,7 +146,7 @@ void __stdcall NumDims(int nargs, c_variable** pargs, c_engine* p_engine, c_vari
 	{
 		result = 0;
 		return;
-	}	
+	}
 	result = p_array->cDims;
 }
 
@@ -458,14 +458,14 @@ void __stdcall ArrCount(int nargs, c_variable** pargs, c_engine* p_engine, c_var
 	{
 		result = INT_MIN;
 		return;
-	}	
+	}
 	// check pointer
 	SAFEARRAY* p_array = parray->parray;
 	if (!p_array)
 	{
 		result = 0;
 		return;
-	}	 
+	}
 	LONG LB = 0;
 	LONG UB = 0;
 	SafeArrayGetLBound(p_array, 1, &LB);
